@@ -1,0 +1,18 @@
+{
+    "main_settings": {
+        "name": "Gineico Quoting System",
+        "text_domain": "gineico_quoting",
+        "tabs": "true",
+        "options_suffix": "_options",
+        "page_suffix": "_page",
+        "author": "Gineico",
+        "author_uri": "https://gineico.com.au",
+        "item_uri": "https://gineico.com.au",
+        "support_uri": "https://gineico.com.au",
+        "support_email": "support@gineico.com.au",
+        "page_slug": "gineico-quoting",
+        "page_hook": "toplevel_page_gineico-quoting-system",
+        "version": "0.1",
+        "wpla_update_url": "https://dustysun.com"
+    }
+}
