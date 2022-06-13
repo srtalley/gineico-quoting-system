@@ -100,7 +100,7 @@ else: ?>
 							$product_short_description = $_product->get_short_description();
 						}
 						if($product_short_description != '') {
-							echo '<div class="quote-product-short-description">' . strip_tags( substr($product_short_description, 0 , 200)) . '&hellip; <a style="text-decoration: none; color: #e2ad68;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a></div>';
+							echo '<div class="quote-product-short-description">' . strip_tags( substr($product_short_description, 0 , 200)) . '&hellip; <a target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a></div>';
 						}
 
 						// Meta data

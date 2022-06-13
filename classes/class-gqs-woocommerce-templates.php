@@ -50,8 +50,10 @@ class GQS_WooCommerce_Templates {
     public static function get_pdf_header_info() {
 
         $html = '';
-        
-        if(site_url() == "https://www.gineicolighting.com.au" || site_url() == "https://gineicolighting.client.dustysun.com") {
+
+        $current_site = GQS_Site_Utils::get_gineico_site_abbreviation();
+
+        if($current_site == 'GL') {
             $html = '<p>
                         <strong>Gineico Lighting</strong><br>
                         <a class="link-nounderline" href="mailto:showroom@gineico.com" target="_blank" style="text-decoration: none; color: #000;">showroom@gineico.com</a><br>
@@ -59,8 +61,8 @@ class GQS_WooCommerce_Templates {
                         <a class="link-nounderline" href="tel:+61-417-950-455" target="_blank" style="text-decoration: none; color: #000; ">+61 417 950 455</a><br>
                     </p>';
 
-        }  if(site_url() == "https://www.gineicomarine.com.au" || site_url() == "https://gineicomarine.dev.dustysun.com") {
-            $html = '<p>
+        } else if($current_site == 'GM') {
+                    $html = '<p>
                         <strong>Gineico Marine</strong><br>
                         <a class="link-nounderline" href="mailto:sales@gineico.com" target="_blank" style="text-decoration: none; color: #000;">sales@gineico.com</a><br>
                         <a class="link-nounderline" href="https://www.gineicomarine.com.au" target="_blank" style="text-decoration: none; color: #000;">www.gineicomarine.com.au</a><br>
@@ -77,11 +79,15 @@ class GQS_WooCommerce_Templates {
 
         $html = '';
 
-        if(site_url() == "https://www.gineicolighting.com.au" || site_url() == "https://gineicolighting.client.dustysun.com") {
-            $html = '<p>Thank you for the opportunity to quote on your lighting selections. Contact Us <a href="tel:+61-417-950-455" style="text-decoration: none; color: #e2ae68; font-weight: bold;">+61 417 950 455</a> © Gineico Lighting | <a href="https://www.gineicolighting.com.au" target="_blank" style="text-decoration: none; color: #e2ae68; font-weight: bold;">www.gineicolighting.com.au</a></p>';
+        $current_site = GQS_Site_Utils::get_gineico_site_abbreviation();
 
-        }  if(site_url() == "https://www.gineicomarine.com.au" || site_url() == "https://gineicomarine.dev.dustysun.com") {
-            $html = '<p>Thank you for the opportunity to quote on your marine selections. Contact Us <a href="tel:+61-7-5556-0244" style="text-decoration: none; color: #e2ae68; font-weight: bold;">+61 7 5556 0244</a> © Gineico Marine | <a href="https://www.gineicomarine.com.au" target="_blank" style="text-decoration: none; color: #e2ae68; font-weight: bold;">www.gineicomarine.com.au</a></p>';
+        $primary_link_color = GQS_Site_Utils::get_gineico_primary_link_color();
+
+        if($current_site == 'GL') {
+            $html = '<p>Thank you for the opportunity to quote on your lighting selections. Contact Us <a href="tel:+61-417-950-455" style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;">+61 417 950 455</a> © Gineico Lighting | <a href="https://www.gineicolighting.com.au" target="_blank" style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;">www.gineicolighting.com.au</a></p>';
+
+        } else if($current_site == 'GM') {
+            $html = '<p>Thank you for the opportunity to quote on your marine selections. Contact Us <a href="tel:+61-7-5556-0244" style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;">+61 7 5556 0244</a> © Gineico Marine | <a href="https://www.gineicomarine.com.au" target="_blank" style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;">www.gineicomarine.com.au</a></p>';
 
         }
 

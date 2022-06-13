@@ -156,7 +156,7 @@ jQuery(function($) {
                     //     $(item_cost_field).parent().find('.gqs-original-price').html(data.price);
                     // });
 
-                    $(this).append('<div class="edit" style="display: none;"><input type="number" autocomplete="off" name="gc_unit_price[' + order_item_id + ']" placeholder="0" value="' + value + '" data-qty="1" class="gc-unit-price"></div>');
+                    $(this).append('<div class="edit" style="display: none;"><input type="number" autocomplete="off" step=".01" name="gc_unit_price[' + order_item_id + ']" placeholder="0" value="' + value + '" data-qty="1" class="gc-unit-price"></div>');
                     var added_edit_field = $(this).find('.edit .gc-unit-price');
 
                     $(added_edit_field).on('change', function() {
@@ -164,18 +164,23 @@ jQuery(function($) {
                         var quantity = $(item_cost_field).parent().find('input.quantity').val(); 
                         
                         var new_price = $(this).val() * quantity;
+                        new_price = new_price.toFixed(2);
 
-                        var total =  $(item_cost_field).parent().find('input.line_total').val(new_price);
-
+                        $(item_cost_field).parent().find('input.line_total').attr('data-total', new_price).val(new_price);
                     });
+                    
+                    // update the line total and GST totla to a number field
+                    $(item_cost_field).parent().find('input.line_total,input.line_tax').attr('type', 'number').attr('step', '.01');
                     $(item_cost_field).parent().find('input.line_total').on('change', function() {
-                    // $(line_total_value).on('change', function() {
                         
                         var quantity = $(item_cost_field).parent().find('input.quantity').val(); 
                         
                         var new_unit_price = $(this).val() / quantity;
+                        new_unit_price = new_unit_price.toFixed(2);
+                        $(item_cost_field).parent().find('input.gc-unit-price').val(new_unit_price);
 
-                        var unit_price =  $(item_cost_field).parent().find('input.gc-unit-price').val(new_unit_price);
+                        $(this).attr('data-total', new_unit_price);
+
                     });
                 }
                 

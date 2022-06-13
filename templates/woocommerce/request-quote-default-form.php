@@ -104,7 +104,16 @@
                  data-sitekey="<?php echo esc_attr( get_option( 'ywraq_reCAPTCHA_sitekey' ) ) ?>"></div>
             </p>
 		<?php endif; ?>
-        <div class="gqs-quote-request-footer"><p>All quotes requested on our website create a user account area for your convenience. Emails will be sent to you containing a copy of your quote request. If this is your first time using our Projects/Quoting tools then a second email will be sent containing login details.</p></div>
+
+        <?php
+            $current_site = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_site_abbreviation();
+
+            if($current_site == 'GL'):
+                ?>
+                <div class="gqs-quote-request-footer"><p>All quotes requested on our website create a user account area for your convenience. Emails will be sent to you containing a copy of your quote request. If this is your first time using our Projects/Quoting tools then a second email will be sent containing login details.</p></div>
+        <?php
+            endif;
+        ?>
 
 		<?php if ( defined( 'ICL_LANGUAGE_CODE' ) ): ?>
             <input type="hidden" class="lang_param" name="lang" value="<?php echo( ICL_LANGUAGE_CODE ); ?>"/>

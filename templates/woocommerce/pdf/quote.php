@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // https://mpdf.github.io/tables/tables.html
 
+$primary_link_color = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_primary_link_color();
 ?>
 <!DOCTYPE html>
 <html>
@@ -79,8 +80,8 @@ if ( ! defined( 'ABSPATH' ) ) {
         }
         
         .small-info{
-			background: #a8c6e4;
-			background: linear-gradient(360deg, #a8c6e4 0%, #ffffff 1%, #ffffff 100%);
+			background: <?php echo $primary_link_color; ?>;
+			background: linear-gradient(360deg, <?php echo $primary_link_color; ?> 0%, #ffffff 1%, #ffffff 100%);
 			padding-left:10px;
 			margin-bottom: 20px;
 		}

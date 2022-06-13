@@ -4,7 +4,7 @@ Plugin Name: Gineico Quoting System
 Description: Adds features to the WooCommerce admin order screen and contains modifications to the YITH Request a Quote system.
 Author: Gineico
 Author URI: https://www.gineico.com.au
-Version: 0.1
+Version: 1.0
 Text Domain: gineico_quoting
 License: GPLv2
 */
@@ -19,7 +19,9 @@ define( 'GINEICO_QUOTING_SYSTEM__FILE__', __FILE__ );
 require_once( dirname( __FILE__ ) . '/gineico-quoting-system-admin.php');
 
 require_once( dirname( __FILE__ ) . '/lib/dustysun-wp-settings-api/ds_wp_settings_api.php');
+require_once( dirname( __FILE__ ) . '/classes/class-gqs-site-utils.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-order.php');
+require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-quote-description.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-templates.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-yith-woocommerce-quotes.php');
 

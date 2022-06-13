@@ -146,6 +146,8 @@ class GQS_WooCommerce_Order {
     public function gqs_woocommerce_order_admin($current_screen) {
         if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
             if($current_screen->id == 'shop_order') {
+                // prevent loading user custom order
+                add_filter( 'get_user_option_meta-box-order_shop_order', '__return_empty_string' );
 
                 // add the CSS & JS
                 add_action('admin_head', array($this, 'gqs_shop_order_quote_css_js'), 1);
@@ -164,6 +166,9 @@ class GQS_WooCommerce_Order {
      * CSS & JS for the shop order
      */
     public function gqs_shop_order_quote_css_js() {
+
+        $primary_link_color = GQS_Site_Utils::get_gineico_primary_link_color();
+
         ?>
 
         <style>
@@ -220,7 +225,7 @@ class GQS_WooCommerce_Order {
                 font-size: 18px;
                 font-weight: 600;
                 line-height: 1.6em;
-                text-decoration-color: #e2ae68;
+                text-decoration-color: <?php echo $primary_link_color; ?>;
                 text-decoration-thickness: .125em;
                 text-underline-offset: 4.5px;
             }
@@ -362,10 +367,30 @@ class GQS_WooCommerce_Order {
             .wc-backbone-modal .wc-backbone-modal-content .widefat>tbody>tr>td:first-child {
                 width: 90%;
             }
-            /* Hide price discount */
+            /* Hide Total/GST discount */
             .line_cost label,
-            .line_cost .line_subtotal {
+            .line_cost .line_subtotal,
+            .line_tax label,
+            .line_tax .line_subtotal_tax  {
                 display: none !important;
+            }
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input div.input input,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input div.input input {
+                border: 1px solid #8c8f94;
+                font-size: 14px;
+                padding: 4px;
+                color: #555;
+                vertical-align: middle;
+            }
+
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input {
+                border: none;
+                box-shadow: none;
+            }
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input div.input:first-child,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input div.input:first-child {
+                border-bottom: none;
             }
         </style>
 
@@ -567,10 +592,9 @@ class GQS_WooCommerce_Order {
             $wp_meta_boxes['shop_order']['normal']['high'] = [];
         }
 
+        // move to the end
         $yith_ywraq_metabox_order = $wp_meta_boxes['shop_order']['normal']['high']['yith-ywraq-metabox-order'];
         unset($wp_meta_boxes['shop_order']['normal']['high']['yith-ywraq-metabox-order']);
-
-
         $wp_meta_boxes['shop_order']['normal']['high']['yith-ywraq-metabox-order'] = $yith_ywraq_metabox_order;
     }
 

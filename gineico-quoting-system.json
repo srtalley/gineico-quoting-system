@@ -11,8 +11,6 @@
         "support_uri": "https://gineico.com.au",
         "support_email": "support@gineico.com.au",
         "page_slug": "gineico-quoting",
-        "page_hook": "toplevel_page_gineico-quoting-system",
-        "version": "0.1",
-        "wpla_update_url": "https://dustysun.com"
+        "page_hook": "toplevel_page_gineico-quoting-system"
     }
 }

@@ -20,6 +20,8 @@ if ( function_exists( 'icl_get_languages' ) ) {
 }
 add_filter( 'woocommerce_is_attribute_in_product_name', '__return_false' );
 
+$primary_link_color = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_primary_link_color();
+
 ?>
 
 <?php
@@ -129,7 +131,7 @@ $colspan = 0;
                     <?php //echo $title
                     //BEGIN GQS CUSTOM
                     //app.launchURL("http://www.mycompany.com/pdfDocument.pdf", true);
-							echo '<a style="text-decoration: none; color: #e2ae68; font-weight: bold;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">' . esc_html( $title ) . '</a>';
+							echo '<a style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">' . esc_html( $title ) . '</a>';
                     // END GQS CUSTOM 
                     // see if the item order meta quote description is set
                     $quote_description = wc_get_order_item_meta($item_id, '_quote_description_custom', true);
@@ -177,7 +179,7 @@ $colspan = 0;
 								$product = wc_get_product($product_id);
 								$product_short_description = $product->get_short_description();
 
-									echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: #e2ae68;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+									echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
 								
 							}
 							echo '</div>';
@@ -231,48 +233,38 @@ $colspan = 0;
                         );
                     }
                     $shipping_method_count = count($selected_shipping_methods);
-                    ?>
-                   
 
-                        <?php
-                        $i = 1;
-                        foreach($selected_shipping_methods as $this_shipping_method) {
-                            ?>
-                            <tr>
-                            <?php
-                            if($i == 1) {
-                                ?>
-                                <th scope="col" colspan="3"></th>
-                                <?php if($shipping_method_count == 1) {
-                                    $freight_td_classes = 'text-align:left; border-top: 1px solid #777; border-left: 1px solid #777; border-bottom: 1px solid #777;';
-                                } else {
-                                    $freight_td_classes = 'text-align:left; border-left: 1px solid #777; border-right: 1px solid #777; border-top: 1px solid #777;  border-color: #777;';
-                                }
-                                ?>
-                                <th scope="col" style="<?php echo $freight_td_classes; ?>"><strong>Freight</strong></th>
-
-                            <?php
-                                } else if($i > 1) {
-
-                                    if($i < $shipping_method_count) {
-                                        $freight_td_classes = 'text-align:left; border-left: 1px solid #777; border-right: 1px solid #777; border-top: 1px solid #777;';
-                                    } else {
-                                        $freight_td_classes = 'text-align:left; border-left: 1px solid #777; border-right: 1px solid #777; border-top: 1px solid #777; border-bottom: 1px solid #777;';
-                                    }
-
-                                    ?>
-                                    <th scope="col" colspan="3"></th>
-                                    <th scope="col" style="<?php echo $freight_td_classes; ?>"></th>
-                                <?php
-                                }
-                                    // end if
+                    $i = 1;
+                    foreach($selected_shipping_methods as $this_shipping_method) {
+                        // this matches a single shipping method or the last of multiple methods
+                        if($i == $shipping_method_count) {                 
+                            $shipping_additional_classes = 'border-bottom: 1px solid #777;';
+                        } else if($i < $shipping_method_count)
+                        if($shipping_method_count >= 1) {
+                            $shipping_additional_classes = 'border-bottom: none;';
+                        }
                         ?>
-                            <td scope="col" colspan="2" style="text-align:right; border-left: 1px solid #777; border-top: 1px solid #777;border-color: #777;"><?php echo $this_shipping_method['name']; ?></td>
-                            <td scope="col" style="text-align:right; border-left: 1px solid #777; border-top: 1px solid #777; border-right: 1px solid #777; border-color: #777;" class="shipping-col"><?php echo  $this_shipping_method['amount']; ?></td>
+                        <tr>
+                        <?php
+                        if($i == 1) {
+                            ?>
+                            <th scope="col" colspan="3"></th>
+                            <th scope="col" style="text-align:left; border-left: 1px solid #777; border-top: 1px solid #777; <?php echo $shipping_additional_classes; ?>"><strong>Freight</strong></th>
+                        <?php
+                        } else if($i > 1) {
+
+                        ?>
+                            <th scope="col" colspan="3"></th>
+                            <th scope="col" style="text-align:left; border-left: 1px solid #777; border-top: 1px solid #777; <?php echo $shipping_additional_classes; ?>"></th>
+                        <?php
+                        } // end if
+                        ?>
+                            <td scope="col" colspan="2" style="text-align:right; border-left: 1px solid #777; border-top: 1px solid #777;border-color: #777; <?php echo $shipping_additional_classes; ?>"><?php echo $this_shipping_method['name']; ?></td>
+                            <td scope="col" style="text-align:right; border-left: 1px solid #777; border-top: 1px solid #777; border-right: 1px solid #777;  <?php echo $shipping_additional_classes; ?>" class="shipping-col"><?php echo  $this_shipping_method['amount']; ?></td>
                             </tr>
                         <?php
                             $i++;
-                            } // end foreach
+                        } // end foreach
                         ?>
 
                     <?php 
