@@ -6,8 +6,7 @@ class GQS_WooCommerce_Order {
   
     public function __construct() {
         
-
-        // Change certa text strings
+        // Change certain text strings
         add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
 
         // Add a meta key to the request a quote items
@@ -25,6 +24,7 @@ class GQS_WooCommerce_Order {
         add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
         // update the PDF name on save
         // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
+
         // Ajax to update the PDF name
         add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
 
@@ -32,7 +32,6 @@ class GQS_WooCommerce_Order {
 
         add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
 
- 
         // do not show discounts in quotes
         add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
 
@@ -45,6 +44,10 @@ class GQS_WooCommerce_Order {
 
         // add a field for the admin orders to show the price without a voucher column
         add_action( 'woocommerce_admin_order_totals_after_discount', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
+
+        // allow resending the quote from the order actions box in the order area
+        add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
+        add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
 
     }
 
@@ -381,6 +384,7 @@ class GQS_WooCommerce_Order {
                 padding: 4px;
                 color: #555;
                 vertical-align: middle;
+                width: 100px;
             }
 
             #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input,
@@ -391,6 +395,19 @@ class GQS_WooCommerce_Order {
             #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input div.input:first-child,
             #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input div.input:first-child {
                 border-bottom: none;
+            }
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .item_cost input {
+                width: 100px;
+            }
+
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .item_cost input::-webkit-outer-spin-button,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .item_cost input::-webkit-inner-spin-button,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input div.input input::-webkit-outer-spin-button,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .split-input div.input input::-webkit-inner-spin-button,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input div.input input::-webkit-outer-spin-button,
+            #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_tax .split-input div.input input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
             }
         </style>
 
@@ -620,6 +637,7 @@ class GQS_WooCommerce_Order {
 
     /**
      * Increase the revision number on save
+     * Not currently being used
      */
     function gqs_update_pdf_name( $post_id ){
 
@@ -670,8 +688,6 @@ class GQS_WooCommerce_Order {
                 //     return false;
                 // }
             }
-
-
         }
     }
     
@@ -691,7 +707,7 @@ class GQS_WooCommerce_Order {
             $is_variation = false;
             $product->get_sku();
             // first see if this line item already has a custom description
-            $quote_description_custom_meta = wc_get_order_item_meta($item_id, '_quote_description_custom', true);
+            $quote_description_custom_meta = wc_get_order_item_meta($item_id, '_gqs_quote_description_custom', true);
             $quote_description = get_post_meta($product->get_id(), 'quote_description', true);
 
             if($product->get_type() == 'variation') {
@@ -768,6 +784,46 @@ class GQS_WooCommerce_Order {
         $order_subtotal = $order->get_subtotal() - $order->get_discount_total();
         echo '<input type="hidden" name="gqs_order_subtotal" value="' . $order_subtotal . '">';
     }
+
+
+    /**
+     * Add the resend quote action to order actions select box on edit order page
+     * Only added for Pending Quote orders
+     *
+     * @param array $actions order actions array to display
+     * @return array - updated actions
+     */
+    public function add_action_to_order_actions_box($actions) {
+        global $theorder;
+        $order_data = $theorder->get_data();
+        if($order_data['status'] != 'ywraq-pending') {
+            return $actions;
+        }
+        $actions['wc_resend_quote_email_action'] = __('Resend Quote Email', 'gineicolighting');
+        return $actions;
+    }
+
+
+    /**
+     * Add an order note when quote resend
+     *
+     * @param \WC_Order $order
+     */
+    public function wc_resend_quote_email_handler($order) {
+        $message = sprintf(__('Quote details email resent by %s.', 'gineicolighting'), wp_get_current_user()->display_name);
+        $order->add_order_note($message);
+
+        $mailer = WC()->mailer();
+        $mails = $mailer->get_emails();
+        if(!empty($mails)) {
+            foreach($mails as $mail) {
+                if($mail->id == 'ywraq_send_quote') {
+                    $mail->trigger($order->get_id());
+                }
+            }
+        }
+    }
+
 } // end class
 
 $gqs_woocommerce_order = new GQS_WooCommerce_Order();

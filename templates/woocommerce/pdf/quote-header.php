@@ -149,19 +149,34 @@ if ( function_exists( 'wc_format_datetime' ) ) {
 <div class="quote-title" style="margin: 30px 0 0;">
 	<h4 style="margin: 0 0 5px 0;"><?php printf( __( 'Quote #%s', 'yith-woocommerce-request-a-quote' ), apply_filters( 'ywraq_quote_number', $order_id ) ) ?> - <?php echo $title_order_date . $pdf_revision_name_extension; ?></h4>
 	<?php
-	if((isset($additional_email_fields['Project Name']) && !empty($additional_email_fields['Project Name'])) or (isset($additional_email_fields['Project Address']) && !empty($additional_email_fields['Project Address']))) {
-        echo '<h5 style="margin: 0;">';
-        if(!empty($additional_email_fields['Project Name'])) {
-	        echo 'Project Name: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Project Name']) . '</span>&nbsp;&nbsp;&nbsp;&nbsp;';
-        }
-        if(!empty($additional_email_fields['Project Address'])) {
-	        echo 'Project Address: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Project Address']) . '</span>';
-        }
-        echo '</h5>';
-	} ?>
-	<?php if(isset($additional_email_fields['Required Delivery Date']) && !empty($additional_email_fields['Required Delivery Date'])) {
-        echo '<h5 style="margin: 0;">Required Delivery Date: ';
-        echo '<span style="font-weight: normal">' . esc_attr($additional_email_fields['Required Delivery Date']) . '</span> ';
-        echo '</h5>';
-	} ?>
+	$current_site = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_site_abbreviation();
+
+	if($current_site == 'GL') {
+		if((isset($additional_email_fields['Project Name']) && !empty($additional_email_fields['Project Name'])) or (isset($additional_email_fields['Project Address']) && !empty($additional_email_fields['Project Address'])) or isset($additional_email_fields['Required Delivery Date']) && !empty($additional_email_fields['Required Delivery Date'])) {
+			echo '<h5 style="margin: 5px 0;">';
+				if(!empty($additional_email_fields['Project Name'])) {
+					echo 'Project Name: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Project Name']) . '</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+				if(!empty($additional_email_fields['Project Address'])) {
+					echo 'Project Address: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Project Address']) . '</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+				if(!empty($additional_email_fields['Required Delivery Date'])) {
+					echo 'Required Delivery Date: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Required Delivery Date']) . '</span> ';
+				}
+			echo '</h5>';
+		} 
+	}
+	if($current_site == 'GM') {
+		if((isset($additional_email_fields['Name of Vessel']) && !empty($additional_email_fields['Name of Vessel'])) or (isset($additional_email_fields['Make & Model of Vessel']) && !empty($additional_email_fields['Make & Model of Vessel']))) {
+			echo '<h5 style="margin: 5px 0;">';
+			if(!empty($additional_email_fields['Name of Vessel'])) {
+				echo 'Name of Vessel: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Name of Vessel']) . '</span>&nbsp;&nbsp;&nbsp;&nbsp;';
+			}
+			if(!empty($additional_email_fields['Make & Model of Vessel'])) {
+				echo 'Make & Model of Vessel: <span style="font-weight: normal">' . esc_attr($additional_email_fields['Make & Model of Vessel']) . '</span>';
+			}
+			echo '</h5>';
+		}
+	}
+	?>
 </div>

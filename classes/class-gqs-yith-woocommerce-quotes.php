@@ -86,7 +86,7 @@ class GQS_YITH_RAQ {
         
         $ywraq_other_email_fields = get_post_meta( $order_id, 'ywraq_other_email_fields', true );
         if(is_array($ywraq_other_email_fields) && isset($ywraq_other_email_fields['Project Name'])) {
-            $project_name = $ywraq_other_email_fields['Project Name'];
+            $project_name = '-' . $ywraq_other_email_fields['Project Name'];
             $project_name = str_replace(' ', '_', $project_name);
         } 
 
@@ -102,7 +102,7 @@ class GQS_YITH_RAQ {
         $order_date = substr($order_date, 0, 10);
         // $order_date = str_replace('-', '_', $order_date);
         $order_date = str_replace('-', '', $order_date);
-        $pdf_file_name = $site_name . '-Quote-' . $order_id . '-' . $project_name . '-' . $order_date . $pdf_revision_name_extension;
+        $pdf_file_name = $site_name . '-Quote-' . $order_id . $project_name . '-' . $order_date . $pdf_revision_name_extension;
         $YITH_Request_Quote = YITH_Request_Quote_Premium();
         $path = $YITH_Request_Quote->create_storing_folder($order_id);
         $file = YITH_YWRAQ_DOCUMENT_SAVE_DIR . $path . $pdf_file_name . '.pdf';

@@ -20,6 +20,7 @@ require_once( dirname( __FILE__ ) . '/gineico-quoting-system-admin.php');
 
 require_once( dirname( __FILE__ ) . '/lib/dustysun-wp-settings-api/ds_wp_settings_api.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-site-utils.php');
+require_once( dirname( __FILE__ ) . '/classes/class-gqs-quote-terms.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-order.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-quote-description.php');
 require_once( dirname( __FILE__ ) . '/classes/class-gqs-woocommerce-templates.php');

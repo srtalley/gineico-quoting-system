@@ -131,10 +131,9 @@ $colspan = 0;
                     <?php //echo $title
                     //BEGIN GQS CUSTOM
                     //app.launchURL("http://www.mycompany.com/pdfDocument.pdf", true);
-							echo '<a style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">' . esc_html( $title ) . '</a>';
-                    // END GQS CUSTOM 
+                    echo '<a style="text-decoration: none; color: ' . $primary_link_color . '; font-weight: bold;" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">' . esc_html( $title ) . '</a>';
                     // see if the item order meta quote description is set
-                    $quote_description = wc_get_order_item_meta($item_id, '_quote_description_custom', true);
+                    $quote_description = wc_get_order_item_meta($item_id, '_gqs_quote_description_custom', true);
                     if($quote_description == '') {
                         // see if the quote description is set 
                         $quote_description = get_post_meta($_product->get_id(), 'quote_description', true);
@@ -156,6 +155,8 @@ $colspan = 0;
                             </div>
                         </small>
                         <?php 
+                    // END GQS CUSTOM 
+
                     else:
 
                     ?>
