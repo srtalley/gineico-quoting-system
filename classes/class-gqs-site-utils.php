@@ -13,9 +13,9 @@ class GQS_Site_Utils {
      * Return the abbreviation for this site
      */
     public static function get_gineico_site_abbreviation() {
-      if(site_url() == "https://www.gineicolighting.com.au" || site_url() == "https://gineicolighting.client.dustysun.com") {
+      if(site_url() == "https://www.gineicolighting.com.au" || site_url() == "https://www.gineicolighting.com.au/staging"|| site_url() == "https://gineicolighting.client.dustysun.com") {
         return 'GL';
-      }  if(site_url() == "https://www.gineicomarine.com.au" || site_url() == "https://gineicomarine.dev.dustysun.com") {
+      }  if(site_url() == "https://www.gineicomarine.com.au" || site_url() == "https://staging.gineicomarine.com.au" || site_url() == "https://gineicomarine.dev.dustysun.com") {
         return 'GM';
       } else {
         return false;

@@ -6,41 +6,43 @@ class GQS_YITH_RAQ {
   
     public function __construct() {
         
-        // PDF file url version string
-        add_filter('ywraq_pdf_file_url', array($this, 'gqs_ywraq_pdf_url_string'), 10, 1);
+        if(site_url() != "https://www.gineicomarine.com.au") {
 
-        add_filter( 'ywraq_pdf_file_name', array($this, 'gqs_ywraq_pdf_file_name'), 10, 2 );
+            // PDF file url version string
+            add_filter('ywraq_pdf_file_url', array($this, 'gqs_ywraq_pdf_url_string'), 10, 1);
 
-        // Fix the issue with color selectors because of the bridge theme
-        add_action('admin_head', array($this, 'gqs_yith_admin_css'));
+            add_filter( 'ywraq_pdf_file_name', array($this, 'gqs_ywraq_pdf_file_name'), 10, 2 );
 
-        // Add a login form to the request-quote-default-form template
-        add_action('gqs_ywraq_after_default_form', array($this, 'gqs_add_login_form'), 10, 1);
+            // Fix the issue with color selectors because of the bridge theme
+            add_action('admin_head', array($this, 'gqs_yith_admin_css'));
 
-        // add a redirect that will go back to the quote page if they 
-        // log in from there
-        add_filter( 'woocommerce_login_redirect', array($this, 'gqs_login_redirect'), 10, 1);
+            // Add a login form to the request-quote-default-form template
+            add_action('gqs_ywraq_after_default_form', array($this, 'gqs_add_login_form'), 10, 1);
 
-        // make sure the return to products button on the request quote
-        // page actually says return to products because it does not
-        // after you submit a quote.
-        add_filter('yith_ywraq_return_to_shop_after_sent_the_request_label', array($this, 'gqs_yith_ywraq_return_to_shop_after_sent_the_request_label'), 10, 1);
-    
-        // get the shop URL after the quote has been submitted
-        add_filter('yith_ywraq_return_to_shop_after_sent_the_request_url', array($this, 'gqs_yith_ywraq_return_to_shop_after_sent_the_request_url'), 10, 1);
+            // add a redirect that will go back to the quote page if they 
+            // log in from there
+            add_filter( 'woocommerce_login_redirect', array($this, 'gqs_login_redirect'), 10, 1);
 
-        // change the my account quote title
-        add_filter('ywraq_my_account_my_quotes_title', array($this, 'gqs_change_ywraq_my_account_my_quotes_title'), 10, 1);
+            // make sure the return to products button on the request quote
+            // page actually says return to products because it does not
+            // after you submit a quote.
+            add_filter('yith_ywraq_return_to_shop_after_sent_the_request_label', array($this, 'gqs_yith_ywraq_return_to_shop_after_sent_the_request_label'), 10, 1);
+        
+            // get the shop URL after the quote has been submitted
+            add_filter('yith_ywraq_return_to_shop_after_sent_the_request_url', array($this, 'gqs_yith_ywraq_return_to_shop_after_sent_the_request_url'), 10, 1);
 
-        // remove all quote statuses except for new from showing for the my account area
-        add_filter('ywraq_my_account_my_quotes_query', array($this, 'gqs_change_ywraq_my_account_my_quotes_query'), 10, 1);
+            // change the my account quote title
+            add_filter('ywraq_my_account_my_quotes_title', array($this, 'gqs_change_ywraq_my_account_my_quotes_title'), 10, 1);
 
-        // update the phone and company fields when quote submitted
-        add_action('ywraq_checkout_update_customer', array($this, 'gqs_ywraq_checkout_update_customer'), 10, 2);
+            // remove all quote statuses except for new from showing for the my account area
+            add_filter('ywraq_my_account_my_quotes_query', array($this, 'gqs_change_ywraq_my_account_my_quotes_query'), 10, 1);
 
-        // change the PDF paper orientation
-        add_filter( 'ywraq_mpdf_args', array($this, 'gineico_ywraq_mpdf_args') );
+            // update the phone and company fields when quote submitted
+            add_action('ywraq_checkout_update_customer', array($this, 'gqs_ywraq_checkout_update_customer'), 10, 2);
 
+            // change the PDF paper orientation
+            add_filter( 'ywraq_mpdf_args', array($this, 'gineico_ywraq_mpdf_args') );
+        }
     }
 
     /** 

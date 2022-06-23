@@ -3,6 +3,10 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.1 - 2022-06-22
+* Hides the shipping options and quote description/part number from GM.
+* Handles the two different tax calculations between the sites.
+
 ## v1.0 - 2022-06-12
 * Initial version - contains items from main themes.
 

@@ -6,12 +6,15 @@ class GQS_Quote_Terms{
 
   
     public function __construct() {
-        // Add the terms at the bottom of the PDF quote
-        add_action( 'yith_ywraq_quote_template_after_content', array($this, 'get_site_quote_terms'));
-        // Check for YITH emails and add the terms to the bottom
-        add_action ( 'woocommerce_email_footer', array($this, 'woocommerce_email_footer_with_terms'), 10, 1);
-        // Set an auto generated quote back to the "New" status
-        // add_action( 'ywraq_after_create_order', array( $this, 'gm_reset_auto_generated_quote_order_status' ), 20, 2 );
+        if(site_url() != "https://www.gineicomarine.com.au") {
+
+            // Add the terms at the bottom of the PDF quote
+            add_action( 'yith_ywraq_quote_template_after_content', array($this, 'get_site_quote_terms'));
+            // Check for YITH emails and add the terms to the bottom
+            add_action ( 'woocommerce_email_footer', array($this, 'woocommerce_email_footer_with_terms'), 10, 1);
+            // Set an auto generated quote back to the "New" status
+            // add_action( 'ywraq_after_create_order', array( $this, 'gm_reset_auto_generated_quote_order_status' ), 20, 2 );
+        }
     }
 
     /** 

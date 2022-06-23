@@ -6,7 +6,9 @@ class GQS_WooCommerce_Templates {
 
   
     public function __construct() {
-        add_filter( 'woocommerce_locate_template', array( $this, 'woocommerce_locate_template' ), 10, 3 );
+        if(site_url() != "https://www.gineicomarine.com.au") {
+            add_filter( 'woocommerce_locate_template', array( $this, 'woocommerce_locate_template' ), 10, 3 );
+        }
     }
     /**
      * Add WooCommerce template location

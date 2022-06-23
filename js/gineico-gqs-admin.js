@@ -17,6 +17,9 @@ jQuery(function($) {
             setupCustomMetaSupport();
         } );
         
+        $( 'body' ).on( 'order-totals-recalculate-complete', function() {
+            setupCustomMetaSupport();
+        } );
         setupCustomShipping();
         addCustomVersionStringToPDFurl();
 
@@ -188,19 +191,34 @@ jQuery(function($) {
         }
 
         // fix the vouchers column
-        var wc_order_totals = $('.wc-order-totals');
-        if(wc_order_totals.length) {
-            // see if the vouchers column is filled
-            var wc_order_totals_lines = $(wc_order_totals).find('.label');
-            $(wc_order_totals_lines).each(function() {
-                if($(this).text() == 'Voucher(s):') {
-                    // hide the vouchers line and fix the item subtotal
-                    $(this).parent().hide();
-                    var subtotal = $(this).parentsUntil('.wc-order-totals').parent().find('input[name="gqs_order_subtotal"]').val();
-                    $(this).parentsUntil('.wc-order-totals').parent().find('tbody tr:first-child .total').html('<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">$</span>' + subtotal + '</bdi></span>');
+        var order_status = $('#order_status');
+        if(order_status.length) {
+            if(order_status.val() == 'wc-ywraq-new' || order_status.val() == 'wc-ywraq-pending' || order_status.val() == 'wc-ywraq-expired' || order_status.val() == 'wc-ywraq-accepted' || order_status.val() == 'wc-ywraq-rejected') {
+                var wc_order_totals = $('.wc-order-totals');
+                //get the site
+                var gineico_site = $('input[name="gineico_site"]').val();
+                if(wc_order_totals.length) {
+                    // see if the vouchers column is filled
+                    var wc_order_totals_lines = $(wc_order_totals).find('.label');
+                    $(wc_order_totals_lines).each(function() {
+                        if($(this).text() == 'Voucher(s):') {
+                            // hide the vouchers line and fix the item subtotal
+                            $(this).parent().hide();
+                            var subtotal = $(this).parentsUntil('.wc-order-totals').parent().find('input[name="gqs_order_subtotal"]').val();
+                            $(this).parentsUntil('.wc-order-totals').parent().find('tbody tr:first-child .total').html('<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">$</span>' + subtotal + '</bdi></span>');
+                        } else if($(this).text() == 'Order Total:' && gineico_site == 'GL') {
+                            if($('input[name="gqs_order_true_total"]').length) {
+
+                                gqs_order_true_total = $('input[name="gqs_order_true_total"]').val();
+                                $(this).parent().find('.total').html('<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">$</span>' + gqs_order_true_total + '</bdi></span>');
+                            }
+                        }
+                    })
                 }
-            })
+            }
         }
+        
+        
     }
     /**
      * Function to get a product price via Ajax
@@ -347,6 +365,11 @@ jQuery(function($) {
                 }, 500);
                 await loop_shipping_options();
                 var result = $('.button.save-action').click();
+                var gineico_site = $('input[name="gineico_site"]').val();
+                if(gineico_site == 'GM') {
+                    // recalculate taxes on GM
+                    $('.button.calculate-action').click();
+                }
                 $('#gqs_reset_form').click();
                 
             };

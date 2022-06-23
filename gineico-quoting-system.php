@@ -4,7 +4,7 @@ Plugin Name: Gineico Quoting System
 Description: Adds features to the WooCommerce admin order screen and contains modifications to the YITH Request a Quote system.
 Author: Gineico
 Author URI: https://www.gineico.com.au
-Version: 1.0
+Version: 1.1
 Text Domain: gineico_quoting
 License: GPLv2
 */

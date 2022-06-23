@@ -6,49 +6,52 @@ class GQS_WooCommerce_Order {
   
     public function __construct() {
         
-        // Change certain text strings
-        add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
+        if(site_url() != "https://www.gineicomarine.com.au" && site_url() != "https://gineicomarine.dev.dustysun.com") {
+            // Add a meta key to the request a quote items
+            add_action( 'ywraq_from_cart_to_order_item', array($this, 'gqs_ywraq_from_cart_to_order_item'), 10, 4 );
 
-        // Add a meta key to the request a quote items
-        add_action( 'ywraq_from_cart_to_order_item', array($this, 'gqs_ywraq_from_cart_to_order_item'), 10, 4 );
+            // Change the meta key display label
+            add_filter( 'woocommerce_order_item_display_meta_key', array($this, 'gqs_filter_wc_order_item_display_meta_key'), 20, 3 );
 
-        // Change the meta key display label
-        add_filter( 'woocommerce_order_item_display_meta_key', array($this, 'gqs_filter_wc_order_item_display_meta_key'), 20, 3 );
+            // Add the missing columns
+            add_action( 'woocommerce_after_order_item_object_save', array($this, 'gqs_woocommerce_after_order_item_object_save'), 10, 2 );
 
-        // Add the missing columns
-        add_action( 'woocommerce_after_order_item_object_save', array($this, 'gqs_woocommerce_after_order_item_object_save'), 10, 2 );
-        
-        add_action( 'current_screen', array($this,'gqs_woocommerce_order_admin'), 10, 1 );
+            // add freight options
+            add_action( 'add_meta_boxes', array($this, 'gqs_shop_order_add_meta_boxes'), 40 );
+        }
+            // Change certain text strings
+            add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
+            
+            add_action( 'current_screen', array($this,'gqs_woocommerce_order_admin'), 10, 1 );
 
-        // Save the PDF name on a new quote
-        add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
-        // update the PDF name on save
-        // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
+            // Save the PDF name on a new quote
+            add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
+            // update the PDF name on save
+            // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
 
-        // Ajax to update the PDF name
-        add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
+            // Ajax to update the PDF name
+            add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
 
-        add_action( 'add_meta_boxes', array($this, 'gqs_shop_order_add_meta_boxes'), 40 );
 
-        add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
 
-        // do not show discounts in quotes
-        add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
+            add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
 
-        // show the quote description in the order area
-        add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
+            // do not show discounts in quotes
+            add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
 
-        // add the original price to the admin order 
-        add_action( 'woocommerce_admin_order_item_headers', array($this, 'gqs_show_original_price_header'), 10, 1 );
-        add_action( 'woocommerce_admin_order_item_values', array($this, 'gqs_show_original_price_value'), 10, 3 );
+            // show the quote description in the order area
+            add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
 
-        // add a field for the admin orders to show the price without a voucher column
-        add_action( 'woocommerce_admin_order_totals_after_discount', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
+            // add the original price to the admin order 
+            add_action( 'woocommerce_admin_order_item_headers', array($this, 'gqs_show_original_price_header'), 10, 1 );
+            add_action( 'woocommerce_admin_order_item_values', array($this, 'gqs_show_original_price_value'), 10, 3 );
 
-        // allow resending the quote from the order actions box in the order area
-        add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
-        add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
-
+            // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area 
+            add_action( 'woocommerce_admin_order_totals_after_shipping', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
+            
+            // allow resending the quote from the order actions box in the order area
+            add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
+            add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
     }
 
 
@@ -71,6 +74,14 @@ class GQS_WooCommerce_Order {
                     break;
             }
         } 
+        // if($domain == 'woocommerce') {
+        //     switch ( $translated_text ) {
+        //         case 'Items Subtotal:':
+        //             $translated_text = __( 'Total Ex. GST:', $domain);
+        //             break;
+        //     }
+        // }
+
         return $translated_text;
     }
     
@@ -171,7 +182,11 @@ class GQS_WooCommerce_Order {
     public function gqs_shop_order_quote_css_js() {
 
         $primary_link_color = GQS_Site_Utils::get_gineico_primary_link_color();
-
+        $site = GQS_Site_Utils::get_gineico_site_abbreviation();
+        $additional_css = '';
+        if($site == 'GL') {
+            $additional_css = '#woocommerce-order-items .add-items .button.add-coupon {display: none;}';
+        }
         ?>
 
         <style>
@@ -211,8 +226,7 @@ class GQS_WooCommerce_Order {
                 padding-left: 10px;
             }
             #woocommerce-order-items .woocommerce_order_items_wrapper table.woocommerce_order_items .line_cost .wc-order-item-discount,
-            .gqs-quote-description-edit-links .hide-link,
-            #woocommerce-order-items .add-items .button.add-coupon {
+            .gqs-quote-description-edit-links .hide-link {
                 display: none;
             }
             .gqs-quote-description-text p {
@@ -409,6 +423,7 @@ class GQS_WooCommerce_Order {
                 -webkit-appearance: none;
                 margin: 0;
             }
+            <?php echo $additional_css; ?>
         </style>
 
         <?php
@@ -777,16 +792,45 @@ class GQS_WooCommerce_Order {
 
     }
     /**
-     * add a field for the admin orders to show the price without a voucher column
+     * Adds hidden fields used to hide the vouchers column, set the site,
+     * the correct subtotal and the correct total.
      */
     public function gqs_show_subtotal_without_vouchers($order_id) {
+        $site = GQS_Site_Utils::get_gineico_site_abbreviation();
+
         $order = wc_get_order($order_id);
         $order_subtotal = $order->get_subtotal() - $order->get_discount_total();
+        $order_subtotal = number_format((float)$order_subtotal, 2, '.', '');
+        $order_total = $order->get_total();
+        $total_ex_gst = $order->get_subtotal() - $order->get_discount_total() + $order->get_shipping_total();
+
+        echo '<input type="hidden" name="gineico_site" value="' . $site . '">';
         echo '<input type="hidden" name="gqs_order_subtotal" value="' . $order_subtotal . '">';
+        ?>
+        <tr>
+            <td class="label">Total Ex. GST:</td>
+            <td width="1%"></td>
+            <td class="total"><?php echo wc_price($total_ex_gst); ?></td>
+        </tr>
+
+        <?php 
+        if($site == 'GL') {
+            $order_gst = round((floatval($order->get_total()) * .1), 2);
+            $order_total = number_format((float)$order_total + $order_gst, 2, '.', '');
+            echo '<input type="hidden" name="gqs_order_true_total" value="' . $order_total . '">';
+
+            ?>
+
+            <tr>
+				<td class="label">GST:</td>
+				<td width="1%"></td>
+				<td class="total"><?php echo wc_price($order_gst); ?></td>
+			</tr>
+            <?php
+        }
     }
 
-
-    /**
+     /**
      * Add the resend quote action to order actions select box on edit order page
      * Only added for Pending Quote orders
      *
@@ -802,7 +846,6 @@ class GQS_WooCommerce_Order {
         $actions['wc_resend_quote_email_action'] = __('Resend Quote Email', 'gineicolighting');
         return $actions;
     }
-
 
     /**
      * Add an order note when quote resend

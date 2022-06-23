@@ -21,6 +21,7 @@ if ( function_exists( 'icl_get_languages' ) ) {
 add_filter( 'woocommerce_is_attribute_in_product_name', '__return_false' );
 
 $primary_link_color = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_primary_link_color();
+$current_gineico_site = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_site_abbreviation();
 
 ?>
 
@@ -218,6 +219,7 @@ $colspan = 0;
 
             <?php
             $bottom_table_array = array();
+
             foreach ( $order->get_order_item_totals() as $key => $total ) {
                 ob_start();
                 if($key == 'shipping') {
@@ -284,6 +286,10 @@ $colspan = 0;
                                 $total_label_additional_classes = 'border-bottom: none;';
                             }
                         }
+
+                        if($key == 'order_total') {
+                            $total['value'] = wc_price($order->get_subtotal() - $order->get_discount_total() + $order->get_shipping_total()); 
+                        }
                         ?>
                         <th scope="col" colspan="3" style="text-align:right;"><?php echo $total['label']; ?></th>
 
@@ -299,10 +305,20 @@ $colspan = 0;
             if(isset($bottom_table_array['shipping'])) {
                 echo $bottom_table_array['shipping'];
             }
+            // echo $bottom_table_array['au-gst-1'];
             echo $bottom_table_array['order_total'];
 
-            $order_gst = round((floatval($order->get_total()) * .1), 2);
-            $order_total_with_gst = floatval($order_gst) + floatval($order->get_total());
+            $order_gst = 0;
+            $order_total_with_gst = 0;
+            if($current_gineico_site == 'GL') {
+                $order_gst = round((floatval($order->get_total()) * .1), 2);
+                $order_total_with_gst = floatval($order_gst) + floatval($order->get_total());
+            } else if($current_gineico_site == 'GM') {
+                $order_gst = $order->get_total_tax();
+                $order_total_with_gst = $order->get_total();
+            }
+
+
             ?>
             <tr>
                 <th scope="col" colspan="4"></th>
