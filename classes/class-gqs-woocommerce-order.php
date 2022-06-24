@@ -49,6 +49,9 @@ class GQS_WooCommerce_Order {
         // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area 
         add_action( 'woocommerce_admin_order_totals_after_shipping', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
         
+        // disable the built-in taxes when taxes are calculated for quotes
+        add_filter( 'woocommerce_order_is_vat_exempt', array($this, 'disable_calculate_taxes_function_for_quotes'), 10, 2 );
+        // add_action( 'woocommerce_order_before_calculate_totals', array($this, 'disable_calculate_taxes_function_for_quotes'), 10, 2 );
         // disable the built in taxes for quotes
         add_action( 'woocommerce_admin_order_data_after_order_details', array($this, 'disable_taxes_for_quotes'), 10, 1 );
 
@@ -802,7 +805,8 @@ class GQS_WooCommerce_Order {
             // we can calculate on our own
             $order_subtotal = $order->get_subtotal() - $order->get_discount_total();
             $order_subtotal = number_format((float)$order_subtotal, 2, '.', '');
-            $order_total = $order->get_total() - $order->get_total_tax();
+            // $order_total = $order->get_total() - $order->get_total_tax();
+            $order_total = $order->get_total();
             $total_ex_gst = $order->get_subtotal() - $order->get_discount_total() + $order->get_shipping_total();
 
             echo '<input type="hidden" name="gineico_site" value="' . $site . '">';
@@ -816,7 +820,8 @@ class GQS_WooCommerce_Order {
 
             <?php 
             // if($site == 'GL') {
-                $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+                // $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+                $order_gst = round((floatval($order->get_total()) * .1), 2);
                 $order_total = number_format((float)$order_total + $order_gst, 2, '.', ',');
                 echo '<input type="hidden" name="gqs_order_true_total" value="' . $order_total . '">';
 
@@ -837,6 +842,20 @@ class GQS_WooCommerce_Order {
     public function disable_taxes_for_quotes($order) {
         if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
             add_filter( 'wc_tax_enabled', '__return_false' );
+        }
+    }
+    /**
+     * Disable the built-in taxes when taxes are calculated for quotes via
+     * the calculate_taxes function
+     */
+    public function disable_calculate_taxes_function_for_quotes($tax_status, $order) {
+        // wl($status);
+        // wl('bud');
+        // wl(true);
+        if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
+            return true;
+        } else {
+            return $status;
         }
     }
      /**

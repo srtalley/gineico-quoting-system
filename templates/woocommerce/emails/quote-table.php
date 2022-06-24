@@ -312,8 +312,10 @@ $show_permalinks = apply_filters( 'ywraq_list_show_product_permalinks', true, 'p
 			echo $bottom_table_array['cart_subtotal'];
 			echo $bottom_table_array['shipping'];
 			echo $bottom_table_array['order_total'];
-			$order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
-			$order_total_with_gst = floatval($order_gst) + floatval($order->get_total() - $order->get_total_tax());
+			// $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+			// $order_total_with_gst = floatval($order_gst) + floatval($order->get_total() - $order->get_total_tax());
+			$order_gst = round((floatval($order->get_total()) * .1), 2);
+			$order_total_with_gst = floatval($order_gst) + floatval($order->get_total());
 			?>
 			<tr>
 				<th class="td" scope="col" colspan="2" style="text-align: left;">GST:</th>

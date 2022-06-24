@@ -311,8 +311,10 @@ $colspan = 0;
             $order_gst = 0;
             $order_total_with_gst = 0;
             // if($current_gineico_site == 'GL') {
-                $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
-                $order_total_with_gst = floatval($order_gst) + floatval($order->get_total() - $order->get_total_tax());
+                // $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+                // $order_total_with_gst = floatval($order_gst) + floatval($order->get_total() - $order->get_total_tax());
+                $order_gst = round((floatval($order->get_total()) * .1), 2);
+                $order_total_with_gst = floatval($order_gst) + floatval($order->get_total());
             // } else if($current_gineico_site == 'GM') {
             //     $order_gst = $order->get_total_tax();
             //     $order_total_with_gst = $order->get_total();
@@ -322,13 +324,13 @@ $colspan = 0;
             ?>
             <tr>
                 <th scope="col" colspan="4"></th>
-                <th scope="col" colspan="2" style="text-align:right;">GST</th>
+                <th scope="col" colspan="2" style="text-align:right;">GST:</th>
                 <td scope="col" class="last-col" style="text-align:right; border-left: 1px solid #777; border-right: 1px solid #777; border-color: #777;"><?php echo wc_price( $order_gst, get_woocommerce_currency_symbol()); ?></td>
             </tr>
 
             <tr>
                 <th scope="col" colspan="4"></th>
-                <th scope="col" colspan="2" style="text-align:right;">TOTAL</th>
+                <th scope="col" colspan="2" style="text-align:right;">TOTAL:</th>
                 <td scope="col" class="last-col" style="text-align:right; border-left: 1px solid #777; border-right: 1px solid #777; border-color: #777;"><?php echo wc_price( $order_total_with_gst, get_woocommerce_currency_symbol()); ?></td>
             </tr>
         <?php endif; ?>
