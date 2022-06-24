@@ -19,39 +19,42 @@ class GQS_WooCommerce_Order {
             // add freight options
             add_action( 'add_meta_boxes', array($this, 'gqs_shop_order_add_meta_boxes'), 40 );
         }
-            // Change certain text strings
-            add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
-            
-            add_action( 'current_screen', array($this,'gqs_woocommerce_order_admin'), 10, 1 );
+        // Change certain text strings
+        add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
+        
+        add_action( 'current_screen', array($this,'gqs_woocommerce_order_admin'), 10, 1 );
 
-            // Save the PDF name on a new quote
-            add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
-            // update the PDF name on save
-            // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
+        // Save the PDF name on a new quote
+        add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
+        // update the PDF name on save
+        // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
 
-            // Ajax to update the PDF name
-            add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
+        // Ajax to update the PDF name
+        add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
 
 
 
-            add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
+        add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
 
-            // do not show discounts in quotes
-            add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
+        // do not show discounts in quotes
+        add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
 
-            // show the quote description in the order area
-            add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
+        // show the quote description in the order area
+        add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
 
-            // add the original price to the admin order 
-            add_action( 'woocommerce_admin_order_item_headers', array($this, 'gqs_show_original_price_header'), 10, 1 );
-            add_action( 'woocommerce_admin_order_item_values', array($this, 'gqs_show_original_price_value'), 10, 3 );
+        // add the original price to the admin order 
+        add_action( 'woocommerce_admin_order_item_headers', array($this, 'gqs_show_original_price_header'), 10, 1 );
+        add_action( 'woocommerce_admin_order_item_values', array($this, 'gqs_show_original_price_value'), 10, 3 );
 
-            // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area 
-            add_action( 'woocommerce_admin_order_totals_after_shipping', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
-            
-            // allow resending the quote from the order actions box in the order area
-            add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
-            add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
+        // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area 
+        add_action( 'woocommerce_admin_order_totals_after_shipping', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
+        
+        // disable the built in taxes for quotes
+        add_action( 'woocommerce_admin_order_data_after_order_details', array($this, 'disable_taxes_for_quotes'), 10, 1 );
+
+        // allow resending the quote from the order actions box in the order area
+        add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
+        add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
     }
 
 
@@ -74,14 +77,6 @@ class GQS_WooCommerce_Order {
                     break;
             }
         } 
-        // if($domain == 'woocommerce') {
-        //     switch ( $translated_text ) {
-        //         case 'Items Subtotal:':
-        //             $translated_text = __( 'Total Ex. GST:', $domain);
-        //             break;
-        //     }
-        // }
-
         return $translated_text;
     }
     
@@ -799,37 +794,51 @@ class GQS_WooCommerce_Order {
         $site = GQS_Site_Utils::get_gineico_site_abbreviation();
 
         $order = wc_get_order($order_id);
-        $order_subtotal = $order->get_subtotal() - $order->get_discount_total();
-        $order_subtotal = number_format((float)$order_subtotal, 2, '.', '');
-        $order_total = $order->get_total();
-        $total_ex_gst = $order->get_subtotal() - $order->get_discount_total() + $order->get_shipping_total();
+        
+        if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
 
-        echo '<input type="hidden" name="gineico_site" value="' . $site . '">';
-        echo '<input type="hidden" name="gqs_order_subtotal" value="' . $order_subtotal . '">';
-        ?>
-        <tr>
-            <td class="label">Total Ex. GST:</td>
-            <td width="1%"></td>
-            <td class="total"><?php echo wc_price($total_ex_gst); ?></td>
-        </tr>
+            // calculate totals and remove any built-in taxes
+            // that have been automatically calculated so
+            // we can calculate on our own
+            $order_subtotal = $order->get_subtotal() - $order->get_discount_total();
+            $order_subtotal = number_format((float)$order_subtotal, 2, '.', '');
+            $order_total = $order->get_total() - $order->get_total_tax();
+            $total_ex_gst = $order->get_subtotal() - $order->get_discount_total() + $order->get_shipping_total();
 
-        <?php 
-        if($site == 'GL') {
-            $order_gst = round((floatval($order->get_total()) * .1), 2);
-            $order_total = number_format((float)$order_total + $order_gst, 2, '.', '');
-            echo '<input type="hidden" name="gqs_order_true_total" value="' . $order_total . '">';
-
+            echo '<input type="hidden" name="gineico_site" value="' . $site . '">';
+            echo '<input type="hidden" name="gqs_order_subtotal" value="' . $order_subtotal . '">';
             ?>
-
             <tr>
-				<td class="label">GST:</td>
-				<td width="1%"></td>
-				<td class="total"><?php echo wc_price($order_gst); ?></td>
-			</tr>
-            <?php
+                <td class="label">Total Ex. GST:</td>
+                <td width="1%"></td>
+                <td class="total"><?php echo wc_price($total_ex_gst); ?></td>
+            </tr>
+
+            <?php 
+            // if($site == 'GL') {
+                $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+                $order_total = number_format((float)$order_total + $order_gst, 2, '.', ',');
+                echo '<input type="hidden" name="gqs_order_true_total" value="' . $order_total . '">';
+
+                ?>
+
+                <tr>
+                    <td class="label gineico_gst">GST:</td>
+                    <td width="1%"></td>
+                    <td class="total"><?php echo wc_price($order_gst); ?></td>
+                </tr>
+                <?php
+            // }
         }
     }
-
+    /**
+     * Disable any built-in tax calculations for quotes
+     */
+    public function disable_taxes_for_quotes($order) {
+        if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
+            add_filter( 'wc_tax_enabled', '__return_false' );
+        }
+    }
      /**
      * Add the resend quote action to order actions select box on edit order page
      * Only added for Pending Quote orders

@@ -206,12 +206,16 @@ jQuery(function($) {
                             $(this).parent().hide();
                             var subtotal = $(this).parentsUntil('.wc-order-totals').parent().find('input[name="gqs_order_subtotal"]').val();
                             $(this).parentsUntil('.wc-order-totals').parent().find('tbody tr:first-child .total').html('<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">$</span>' + subtotal + '</bdi></span>');
-                        } else if($(this).text() == 'Order Total:' && gineico_site == 'GL') {
+                        } else if($(this).text() == 'Order Total:') {
                             if($('input[name="gqs_order_true_total"]').length) {
 
                                 gqs_order_true_total = $('input[name="gqs_order_true_total"]').val();
                                 $(this).parent().find('.total').html('<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">$</span>' + gqs_order_true_total + '</bdi></span>');
                             }
+                        } else if($(this).text() == 'GST:' && !$(this).hasClass('gineico_gst')) {
+                            // hide if the built in GST is showing and
+                            // only show ours
+                            $(this).parent().hide();
                         }
                     })
                 }
@@ -365,11 +369,11 @@ jQuery(function($) {
                 }, 500);
                 await loop_shipping_options();
                 var result = $('.button.save-action').click();
-                var gineico_site = $('input[name="gineico_site"]').val();
-                if(gineico_site == 'GM') {
-                    // recalculate taxes on GM
-                    $('.button.calculate-action').click();
-                }
+                // var gineico_site = $('input[name="gineico_site"]').val();
+                // if(gineico_site == 'GM') {
+                //     // recalculate taxes on GM
+                //     $('.button.calculate-action').click();
+                // }
                 $('#gqs_reset_form').click();
                 
             };

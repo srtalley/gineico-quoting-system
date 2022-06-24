@@ -21,7 +21,7 @@ if ( function_exists( 'icl_get_languages' ) ) {
 add_filter( 'woocommerce_is_attribute_in_product_name', '__return_false' );
 
 $primary_link_color = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_primary_link_color();
-$current_gineico_site = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_site_abbreviation();
+// $current_gineico_site = Gineicio\QuotingSystem\GQS_Site_Utils::get_gineico_site_abbreviation();
 
 ?>
 
@@ -310,13 +310,13 @@ $colspan = 0;
 
             $order_gst = 0;
             $order_total_with_gst = 0;
-            if($current_gineico_site == 'GL') {
-                $order_gst = round((floatval($order->get_total()) * .1), 2);
-                $order_total_with_gst = floatval($order_gst) + floatval($order->get_total());
-            } else if($current_gineico_site == 'GM') {
-                $order_gst = $order->get_total_tax();
-                $order_total_with_gst = $order->get_total();
-            }
+            // if($current_gineico_site == 'GL') {
+                $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
+                $order_total_with_gst = floatval($order_gst) + floatval($order->get_total() - $order->get_total_tax());
+            // } else if($current_gineico_site == 'GM') {
+            //     $order_gst = $order->get_total_tax();
+            //     $order_total_with_gst = $order->get_total();
+            // }
 
 
             ?>
