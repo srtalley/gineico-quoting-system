@@ -51,7 +51,7 @@ class GQS_WooCommerce_Order {
         
         // disable the built-in taxes when taxes are calculated for quotes
         add_filter( 'woocommerce_order_is_vat_exempt', array($this, 'disable_calculate_taxes_function_for_quotes'), 10, 2 );
-        // add_action( 'woocommerce_order_before_calculate_totals', array($this, 'disable_calculate_taxes_function_for_quotes'), 10, 2 );
+
         // disable the built in taxes for quotes
         add_action( 'woocommerce_admin_order_data_after_order_details', array($this, 'disable_taxes_for_quotes'), 10, 1 );
 
@@ -849,9 +849,6 @@ class GQS_WooCommerce_Order {
      * the calculate_taxes function
      */
     public function disable_calculate_taxes_function_for_quotes($tax_status, $order) {
-        // wl($status);
-        // wl('bud');
-        // wl(true);
         if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
             return true;
         } else {
