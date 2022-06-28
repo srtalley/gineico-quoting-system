@@ -61,7 +61,7 @@ class GQS_WooCommerce_Order {
     }
 
 
-/**
+    /**
      * Change various text strings
      */
     public function change_text_strings($translated_text, $text, $domain) {

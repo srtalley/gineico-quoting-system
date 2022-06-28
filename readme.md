@@ -3,6 +3,9 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.4 - 2022-06-28
+* Added the email templates for the new quote that goes to admins. Removed the totals column.
+
 ## v1.3 - 2022-06-24
 * Now filtering the calculate_taxes function to disable taxes for quotes.
 
