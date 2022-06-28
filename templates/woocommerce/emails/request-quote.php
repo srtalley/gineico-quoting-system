@@ -75,7 +75,7 @@ wc_get_template(
 </div>
 
 <?php if ( ( 0 !== $customer && ( get_option( 'ywraq_enable_order_creation', 'yes' ) === 'yes' ) ) || ( $page_detail_admin && get_option( 'ywraq_enable_order_creation', 'yes' ) === 'yes' ) ) : ?>
-	<p style="margin-bottom:30px"><?php printf( '%s <a href="%s">%s</a>', wp_kses_post( __( 'You can see details here:', 'yith-woocommerce-request-a-quote' ) ), esc_url( YITH_YWRAQ_Order_Request()->get_view_order_url( $order_id, $page_detail_admin ) ), wp_kses_post( $quote_number ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+	<!-- <p style="margin-bottom:30px"><?php //printf( '%s <a href="%s">%s</a>', wp_kses_post( __( 'You can see details here:', 'yith-woocommerce-request-a-quote' ) ), esc_url( YITH_YWRAQ_Order_Request()->get_view_order_url( $order_id, $page_detail_admin ) ), wp_kses_post( $quote_number ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p> -->
 <?php endif ?>
 
 
