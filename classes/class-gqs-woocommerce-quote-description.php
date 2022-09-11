@@ -16,7 +16,7 @@ class GQS_WooCommerce_Quote_Description {
 
         // Save the custom Quote Description when editing a manual order
         add_action( 'woocommerce_before_save_order_items', array($this, 'gqs_save_custom_order_items'), 10, 2 );
-        add_filter('woocommerce_hidden_order_itemmeta', array($this, 'gqs_hide_quote_description_custom_meta'), 10, 1);
+        add_filter( 'woocommerce_hidden_order_itemmeta', array($this, 'gqs_hide_quote_description_custom_meta'), 10, 1 );
         
     }
     

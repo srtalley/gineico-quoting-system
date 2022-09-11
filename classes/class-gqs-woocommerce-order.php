@@ -26,13 +26,12 @@ class GQS_WooCommerce_Order {
 
         // Save the PDF name on a new quote
         add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
+        
         // update the PDF name on save
         // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
 
         // Ajax to update the PDF name
         add_action( 'wp_ajax_gqs_save_pdf_name', array($this, 'gqs_save_pdf_name') );
-
-
 
         add_filter( 'yith_ywraq_metabox_fields', array($this, 'gqs_yith_ywraq_metabox_fields'), 10, 3 );
 
@@ -58,6 +57,7 @@ class GQS_WooCommerce_Order {
         // allow resending the quote from the order actions box in the order area
         add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
         add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
+
     }
 
 
@@ -461,6 +461,9 @@ class GQS_WooCommerce_Order {
         update_post_meta( $order_id, '_gqs_ywraq_pdf_revision_number', $value );
     }
 
+    /**
+     * Add the metabox in the order area for the shipping options
+     */
     public function gqs_shop_order_add_meta_boxes() {
         add_meta_box( 
             'gqs-order-custom', 

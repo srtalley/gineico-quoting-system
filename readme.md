@@ -3,6 +3,12 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.5 - 2022-09-11
+* Updated the PDF to also show product attributes even if a Quote Description is defined.
+* Added a "Notes" section for each product on the backend.
+* Added line break formatting to the Quote Description when displayed on the PDF.
+* Updated the SKU field to use a "Brand Prefix" if defined for each brand category.
+
 ## v1.4 - 2022-06-28
 * Added the email templates for the new quote that goes to admins. Removed the totals column.
 

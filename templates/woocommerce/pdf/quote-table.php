@@ -147,45 +147,44 @@ $colspan = 0;
                             }
                         } 
                     }
-                   
-                    if($quote_description != ''):
-                        ?>
-                        <small>
-                            <div class="quote-description">
-                                <?php echo $quote_description; ?>
-                            </div>
-                        </small>
-                        <?php 
-                    // END GQS CUSTOM 
 
-                    else:
+                    // convert line breaks to paragraphs
+                    $quote_description = wpautop($quote_description);
 
                     ?>
-                       <small><?php
-
+                       <small>
+                            <?php
                             //BEGIN GQS CUSTOM	
-							echo '<div class="product-description">';
-							$product_id  = '';
-							$variation_description = '';
-							if($_product->is_type('variable') || $_product->is_type('variation')) {
-								$product_id = $_product->get_parent_id();
-								$variation_description_raw = strip_tags($_product->get_variation_description());
-								if($variation_description_raw != '' && $variation_description_raw != null) {
-									$variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
-								}
 
-							} else if($_product->is_type('simple')) {
-								$product_id = $_product->get_id();
-							}
-							if($product_id != '') {
-								$product = wc_get_product($product_id);
-								$product_short_description = $product->get_short_description();
+                            if($quote_description != ''):
+                                echo '<div class="quote-description">';
+                                echo $quote_description;
+                                echo '</div>';
+                            else:
 
-									echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
-								
-							}
-							echo '</div>';
-                            echo $variation_description;
+                                echo '<div class="product-description">';
+                                $product_id  = '';
+                                $variation_description = '';
+                                if($_product->is_type('variable') || $_product->is_type('variation')) {
+                                    $product_id = $_product->get_parent_id();
+                                    $variation_description_raw = strip_tags($_product->get_variation_description());
+                                    if($variation_description_raw != '' && $variation_description_raw != null) {
+                                        $variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
+                                    }
+
+                                } else if($_product->is_type('simple')) {
+                                    $product_id = $_product->get_id();
+                                }
+                                if($product_id != '') {
+                                    $product = wc_get_product($product_id);
+                                    $product_short_description = $product->get_short_description();
+
+                                        echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+                                    
+                                }
+                                echo '</div>';
+                                echo $variation_description;
+                            endif;
                             //END GQS CUSTOM
 
 						   if ( $im ) {
@@ -198,7 +197,8 @@ $colspan = 0;
                                     $strings[] = '<span class="wc-item-meta-label" style="display: inline-block"><strong>' . wp_kses_post( $meta->display_key ) . ':</strong></span>&nbsp;<span class="wc-item-meta-value" style="display: inline-block">' . $value . '</span>';
                                 }
                                 if ( $strings ) {
-                                    $html = '<span style="display: block; height: 5px;">&nbsp;</span><ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
+                                    // $html = '<span style="display: block; height: 5px;">&nbsp;</span><ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
+                                    $html = '<ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
                                 }
                         
                                 echo $html;
@@ -206,7 +206,7 @@ $colspan = 0;
 	                       ?></small>
                            
                            <?php 
-                            endif; // if quote_description
+                            //endif; // if quote_description
                             ?>
                            
                            </td>
