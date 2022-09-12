@@ -19,7 +19,9 @@ class GQS_WooCommerce_Product {
             add_action( 'save_post_product', array($this, 'gqs_save_product_admin_fields'), 10, 3 );
 
             // change the display of the sku by adding the brand on the product page
-            add_filter( 'woocommerce_get_sku', array($this, 'gqs_change_woocommerce_sku_display'), 10, 2 );
+            add_filter( 'woocommerce_product_get_sku', array($this, 'gqs_change_woocommerce_sku_display'), 10, 2 );
+            add_filter( 'woocommerce_product_variation_get_sku', array($this, 'gqs_change_woocommerce_sku_display'), 10, 2 );
+
         }
 
     }
@@ -138,10 +140,19 @@ class GQS_WooCommerce_Product {
      */
     public function gqs_change_woocommerce_sku_display( $sku, $product ) {
 
+        if($sku == '') 
+            return;
+
+        $taxonomy_product_id = $product->get_id();
+        // if this is a varation get the parent product id
+        if($product->get_type() == 'variation') {
+            $taxonomy_product_id = $product->get_parent_id();
+        } 
+        
         $main_brand_prefix = '';
 
         // Retrieve associated brand terms
-        $brands = get_the_terms( $product->get_id(), 'brands' );
+        $brands = get_the_terms( $taxonomy_product_id, 'brands' );
 
         if(is_array($brands) && !empty($brands) && isset($brands[0])) {
             // get the first brand
@@ -150,9 +161,13 @@ class GQS_WooCommerce_Product {
         }
 
         if($main_brand_prefix != '') {
-            // remove any GL or GM at the beginning
-            $current_gineico_site = GQS_Site_Utils::get_gineico_site_abbreviation();
-            $sku = str_replace($current_gineico_site . '-', $main_brand_prefix . '-', $sku);
+            // see if it already starts with the prefix and if so, continue
+            if(substr($sku, 0, strlen($main_brand_prefix . '-')) !== $main_brand_prefix . '-') {
+                 // remove any GL or GM at the beginning
+                $current_gineico_site = GQS_Site_Utils::get_gineico_site_abbreviation();
+                $sku = str_replace($current_gineico_site . '-', '', $sku);
+                $sku = $main_brand_prefix . '-' . $sku;
+            }
         }
         return $sku;
 

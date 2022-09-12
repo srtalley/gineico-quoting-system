@@ -3,6 +3,9 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.5.1 - 2022-09-12
+* Bug fixes to the get_sku filter for product variations.
+
 ## v1.5 - 2022-09-11
 * Updated the PDF to also show product attributes even if a Quote Description is defined.
 * Added a "Notes" section for each product on the backend.

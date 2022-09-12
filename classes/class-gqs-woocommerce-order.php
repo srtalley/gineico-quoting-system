@@ -721,7 +721,7 @@ class GQS_WooCommerce_Order {
         if(is_object($product)) {
 
             $is_variation = false;
-            $product->get_sku();
+            // $product->get_sku();
             // first see if this line item already has a custom description
             $quote_description_custom_meta = wc_get_order_item_meta($item_id, '_gqs_quote_description_custom', true);
             $quote_description = get_post_meta($product->get_id(), 'quote_description', true);
