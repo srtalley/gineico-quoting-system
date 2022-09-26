@@ -143,22 +143,7 @@ class GQS_WooCommerce_Product {
         if($sku == '') 
             return;
 
-        $taxonomy_product_id = $product->get_id();
-        // if this is a varation get the parent product id
-        if($product->get_type() == 'variation') {
-            $taxonomy_product_id = $product->get_parent_id();
-        } 
-        
-        $main_brand_prefix = '';
-
-        // Retrieve associated brand terms
-        $brands = get_the_terms( $taxonomy_product_id, 'brands' );
-
-        if(is_array($brands) && !empty($brands) && isset($brands[0])) {
-            // get the first brand
-            $main_brand = $brands[0];
-            $main_brand_prefix = get_field('brand_prefix', 'brands' . '_' . $main_brand->term_id);
-        }
+        $main_brand_prefix = self::get_brand_prefix($product);
 
         if($main_brand_prefix != '') {
             // see if it already starts with the prefix and if so, continue
@@ -172,6 +157,35 @@ class GQS_WooCommerce_Product {
         return $sku;
 
     }
+
+    /**
+     * Gets the brand prefix of the first/main brand selected in the brands
+     * taxonomy when given a product.
+     */
+    public static function get_brand_prefix($product) {
+
+        $product_id = $product->get_id();
+
+        // if this is a varation get the parent product id
+        if($product->get_type() == 'variation') {
+            $product_id = $product->get_parent_id();
+        } 
+        
+        $main_brand_prefix = '';
+
+        // Retrieve associated brand terms
+        $brands = get_the_terms( $product_id, 'brands' );
+
+        if(is_array($brands) && !empty($brands) && isset($brands[0])) {
+            // get the first brand
+            $main_brand = $brands[0];
+            $main_brand_prefix = get_field('brand_prefix', 'brands' . '_' . $main_brand->term_id);
+        }
+
+        return $main_brand_prefix;
+
+    }
+ 
 
 } // end class
 

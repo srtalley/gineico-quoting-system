@@ -3,6 +3,9 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.5.2 - 2022-09-25
+* Added a separate function to return the brand prefix for a product so that it can be reused.
+
 ## v1.5.1 - 2022-09-12
 * Bug fixes to the get_sku filter for product variations.
 
