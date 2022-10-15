@@ -16,9 +16,9 @@
  */
 
 $mail_options      = get_option( 'woocommerce_ywraq_email_settings' );
-// get the raq_data from the db if not defined when testing
+// get the raq_data from the db if not defined 
 if(!is_array($raq_data)) {
-	$raq_data = get_post_meta($raq_data, '_raq_request', true); //array('order_id' => $raq_data);
+	$raq_data = get_post_meta($raq_data, '_raq_request', true); 
 }
 $order_id          = $raq_data['order_id'];
 $order             = wc_get_order( $order_id ); //phpcs:ignore

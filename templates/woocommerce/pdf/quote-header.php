@@ -41,10 +41,10 @@ $user_email        = $order->get_meta( 'ywraq_customer_email' ); //phpcs:ignore
 $formatted_address = $order->get_formatted_billing_address();
 
 $billing_phone   = $order->get_meta( 'ywraq_billing_phone' );
-$billing_name    = $order->get_meta( '_billing_first_name' );
-$billing_surname = $order->get_meta( '_billing_last_name' );
+$billing_name    = $order->get_billing_first_name();
+$billing_surname = $order->get_billing_last_name();
 $billing_phone   = $order->get_meta( 'ywraq_billing_phone' );
-$billing_phone   = empty( $billing_phone ) ? $order->get_meta( '_billing_phone' ) : $billing_phone;
+$billing_phone   = empty( $billing_phone ) ? $order->get_billing_phone() : $billing_phone;
 $billing_vat     = $order->get_meta( 'ywraq_billing_vat' );
 
 
@@ -53,7 +53,7 @@ $exdata = $order->get_meta( '_ywcm_request_expire' );
 /* GQS CUSTOM */
 $title_order_date   = date_i18n('d/m/Y', strtotime(yit_get_prop($order, 'date_created', true)));
 $additional_email_fields = get_post_meta( $order_id, 'ywraq_other_email_fields', true );
-$g_ywraq_pdf_revision_number = get_post_meta( $order_id, '_gqs_ywraq_pdf_revision_number', true );
+$gqs_ywraq_pdf_revision_number = get_post_meta( $order_id, '_gqs_ywraq_pdf_revision_number', true );
 $pdf_revision_name_extension = '';
 if(is_array($gqs_ywraq_pdf_revision_number) && isset($gqs_ywraq_pdf_revision_number['html'])) {
 	$pdf_revision = $gqs_ywraq_pdf_revision_number['html'];

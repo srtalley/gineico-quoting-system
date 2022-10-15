@@ -22,10 +22,31 @@ class GQS_WooCommerce_Product {
             add_filter( 'woocommerce_product_get_sku', array($this, 'gqs_change_woocommerce_sku_display'), 10, 2 );
             add_filter( 'woocommerce_product_variation_get_sku', array($this, 'gqs_change_woocommerce_sku_display'), 10, 2 );
 
+            // add CSS to modify the behavior of the request a quote button when the options
+            // are not all selected
+            // add_action( 'woocommerce_before_single_variation', array($this, 'gqs_add_variations_button_to_single_product'), 10 );
+
+            // ajax to handle adding products without all options selected
+            // add_action( 'wp_ajax_nopriv_gqs_add_parent_product_to_quote', array($this, 'gqs_add_parent_product_to_quote') );
+            // add_action( 'wp_ajax_gqs_add_parent_product_to_quote', array($this, 'gqs_add_parent_product_to_quote') );
+
+            // change the choose an option text on variable products
+            add_filter( 'woocommerce_dropdown_variation_attribute_options_args', array($this, 'gqs_change_variation_dropdown'), 10 , 1 );
+
+            // filter the options being added so that variations can be added 
+            // without all options being chosen
+            add_filter( 'ywraq_add_item', array($this, 'filter_product_raq'), 10, 2 );
+
+            // change the id for the key for each quote item to allow adding the 
+            // parent product multiple times with different incomplete options
+            add_filter( 'ywraq_quote_item_id', array($this, 'filter_quote_item_id'), 10, 3 );
+
+            // filter the check to see if an item exists in the list so we can check for 
+            // our custom parent items that have been added
+            add_filter( 'ywraq_exists_in_list', array($this, 'filter_exists_in_list'), 10, 5 );
         }
 
     }
-    
 
     /**
      * Add the metabox in the product screen
@@ -186,6 +207,200 @@ class GQS_WooCommerce_Product {
 
     }
  
+     /**
+     * Add CSS to modify the behavior of the request a quote button when the options
+     * are not all selected
+     * Disabled 10/13/2022
+     */
+    // public function gqs_add_variations_button_to_single_product() {
+
+        // echo '<style type="text/css">';
+        
+        // echo ".woocommerce-variation-add-to-cart-disabled + .yith-ywraq-add-to-quote .yith-ywraq-add-button .add-request-quote-button.disabled:after {
+        //         content: '';
+        //         position: absolute;
+        //         top: 0;
+        //         left: 0;
+        //         width: 100%;
+        //         height: 100%;
+        //         background: #020202;
+        //         display: flex;
+        //         flex-direction: row;
+        //         align-items: center;
+        //         justify-content: center;
+        //         opacity: 0;
+        //     }";
+        // echo ".woocommerce-variation-add-to-cart-disabled + .yith-ywraq-add-to-quote  .yith-ywraq-add-button:hover {
+        //         cursor: pointer;
+        //     }";
+        // echo ".woocommerce-variation-add-to-cart-disabled + .yith-ywraq-add-to-quote .yith-ywraq-add-button:hover .add-request-quote-button.disabled {
+        //         opacity: 1 !important;
+        //     }";
+        // echo ".woocommerce-variation-add-to-cart-disabled + .yith-ywraq-add-to-quote .yith-ywraq-add-button:hover .add-request-quote-button.disabled:after {
+        //         opacity: 1;
+        //     }";
+        // echo '</style>';
+
+    // }
+
+
+    /**
+     * Ajax function to add variable products to the quote even
+     * though not all options are selected
+     * Disabled 10/13/2022
+     */
+    // public function gqs_add_parent_product_to_quote() {
+
+    //     // get the current quote
+    //     $current_user_quote = YITH_Request_Quote();
+     
+    //     parse_str($_POST['product_options'], $product_options);
+
+    //     $gqs_product_attributes = array();
+    //     foreach($product_options as $key => $value) {
+    //         if( substr( $key, 0, 9 ) === 'attribute' ) {
+    //             $label = str_replace( 'attribute_', '', $key );
+    //             $label = str_replace( '-', ' ', $label );
+    //             $label = ucwords($label);
+    //             $gqs_product_attributes[$key]['name'] = $label;
+    //             $gqs_product_attributes[$key]['value'] = $value;
+    //         }
+    //     }
+    //     $product_raq = array(
+    //         'product_id' => sanitize_text_field($product_options['product_id']),
+    //         'quantity'   => sanitize_text_field($product_options['quantity']),
+    //         'gqs_product_attributes' => $gqs_product_attributes
+    //     );
+
+    //     // create a key name 
+    //     $key_name = $product_raq['product_id'];
+    //     foreach( $product_raq['gqs_product_attributes'] as $attribute ) {
+    //         $key_name .= ',' . $attribute['value'];
+    //     }
+    //     $key_name = md5( $key_name );
+
+    //     // see if it exists and if not add it
+    //     if( $this->gqs_product_exists_in_quote($key_name) ) {
+    //         $status = 'exists';
+    //         $message = $current_user_quote->errors;
+    //     } else {
+    //         $current_user_quote->raq_content[ apply_filters( 'ywraq_quote_item_id', $key_name, $product_raq, $product_raq['product_id'] ) ] = $product_raq;
+    //         $current_user_quote->set_session( $current_user_quote->raq_content );
+    //         $current_user_quote->maybe_set_raq_cookies();
+    //         $status = 'true';
+    //         $message = 'Product added.';
+    //     }
+
+    //     $return_info = array(
+    //         'result' => $status,
+    //         'message' => $message
+    //     );
+
+    //     wp_send_json($return_info);
+    
+    // }
+    /**
+     * Check if a given key exists within the current quote
+     * Disabled 10/13/2022
+     */
+    // public function gqs_product_exists_in_quote( $key_name ) {
+
+    //     // get the current quote
+    //     $current_user_quote = YITH_Request_Quote();
+
+    //     if ( array_key_exists( $key_name, $current_user_quote->raq_content ) ) {
+    //         $current_user_quote->errors[] = __( 'Product already in the list.', 'yith-woocommerce-request-a-quote' );
+    //         return true;
+    //     }
+
+    //     return false;
+        
+    // }
+
+
+
+    /**
+     * Filter the attributes stored for variable products without all
+     * variation items selected
+     */
+    public function filter_product_raq($raq, $product_raq) {
+
+        // get the product 
+        $product = wc_get_product( $product_raq['product_id'] );
+        if($product->get_type() == 'variable' && $product_raq['variation_id'] == '') {
+
+            $gqs_product_attributes = array();
+            foreach($product_raq as $key => $value) {
+                if( substr( $key, 0, 9 ) === 'attribute' ) {
+                    $label = str_replace( 'attribute_', '', $key );
+                    $label = str_replace( '-', ' ', $label );
+                    $label = str_replace( 'pa_', '', $label );
+                    $label = ucwords($label);
+                    $gqs_product_attributes[$key]['name'] = $label;
+                    $gqs_product_attributes[$key]['value'] = ucwords($value);
+                }
+            }
+
+            $raq['gqs_product_attributes'] = $gqs_product_attributes;
+        }
+
+        return $raq;
+    }
+    /** 
+     * Change the product key in the quote for products without all 
+     * variation items selected
+     */
+    public function filter_quote_item_id($key_name, $product_raq, $product_id) {
+
+        $product = wc_get_product( $product_raq['product_id'] );
+        if($product->get_type() == 'variable' && $product_raq['variation_id'] == '') {
+            // create a key name 
+            $key_name = $this->build_custom_ywraq_key_name($product_raq['product_id'], $product_raq);
+        }
+        return $key_name;
+    }
+
+    /**
+     * Filter the key name for parent products that were added without full
+     * variations being selected
+     */
+    public function filter_exists_in_list( $return, $product_id, $variation_id, $postadata, $raq_content ) {
+        
+        $product = wc_get_product( $product_id );
+        if($product->get_type() == 'variable' && $product_raq['variation_id'] == '') {
+            $key_name = $this->build_custom_ywraq_key_name($product_id, $_POST);
+            $current_user_quote = YITH_Request_Quote();
+            if ( array_key_exists( $key_name, $current_user_quote->raq_content ) ) {
+                $current_user_quote->errors[] = __( 'Product already in the list.', 'yith-woocommerce-request-a-quote' );
+                $return         = true;
+            }
+        }
+       
+        return $return;
+    }
+
+    /**
+     * Construct a custom key name based on the product ID and the chosen
+     * variation options
+     */
+    private function build_custom_ywraq_key_name( $product_id, $product_data ) {
+        $key_name = $product_id;
+        foreach( $product_data as $key => $attribute ) {
+            if( substr( $key, 0, 9 ) === 'attribute' ) {
+                $key_name .= ',' . $key . '_' . $attribute;
+            }
+        }
+        $key_name = md5( $key_name );
+        return $key_name;
+    }
+
+    /**
+     * Change the choose an option text for variable products
+     */
+    public function gqs_change_variation_dropdown( $args ) {
+        $args['show_option_none'] = __( 'Choose an option if known', 'woocommerce' );
+        return $args;
+    }
 
 } // end class
 

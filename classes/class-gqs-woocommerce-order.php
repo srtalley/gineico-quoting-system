@@ -38,6 +38,12 @@ class GQS_WooCommerce_Order {
         // do not show discounts in quotes
         add_filter( 'option_ywraq_show_old_price', array($this, 'filter_ywraq_show_old_price'), 10, 1 );
 
+        // show the product options for parent products that were added with selected options
+        add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_parent_product_select_options'), 10, 3 );
+
+        // add the custom product attributes in the order admin screen
+        add_action( 'ywraq_from_cart_to_order_item', array( $this, 'gqs_add_order_item_meta' ), 11, 3 );
+
         // show the quote description in the order area
         add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
 
@@ -57,6 +63,7 @@ class GQS_WooCommerce_Order {
         // allow resending the quote from the order actions box in the order area
         add_action( 'woocommerce_order_actions', array($this, 'add_action_to_order_actions_box') );
         add_action( 'woocommerce_order_action_wc_resend_quote_email_action', array($this, 'wc_resend_quote_email_handler') );
+
 
     }
 
@@ -439,7 +446,9 @@ class GQS_WooCommerce_Order {
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
             'ajaxnonce' => wp_create_nonce( 'gqs_mods_init_nonce' )
         ) );
+
     }
+
     /**
      * Add a PDF name on new order
      */
@@ -449,6 +458,7 @@ class GQS_WooCommerce_Order {
         );
         update_post_meta( $order_id, '_gqs_ywraq_pdf_revision_number', $value );
     }
+
     /**
      * Save the PDF name that is entered
      */
@@ -474,6 +484,10 @@ class GQS_WooCommerce_Order {
             'high'
         );
     }
+    
+    /**
+     * Callback function to show the shipping option metabox
+     */
     public function gqs_shop_order_custom_metabox_callback() {
 
         $freight_name = 'Freight - Delivery From Gineico QLD Warehouse To Client To Be Confirmed';
@@ -706,7 +720,6 @@ class GQS_WooCommerce_Order {
             }
         }
     }
-    
 
     /**
      * Do not show discounts in subtotals in PDFs
@@ -714,6 +727,51 @@ class GQS_WooCommerce_Order {
     public function filter_ywraq_show_old_price($value) {
         return 'no';
     }
+
+        /**
+     * Show the options selected when adding parent products with only partial options added
+     */
+    public function gqs_show_parent_product_select_options($item_id, $item, $product) {
+        
+        // see if the product attributes key exists
+        $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
+
+        if(is_array($gqs_product_attributes)) {
+            $html = '<div class="view">';
+            $html .= '<table cellspacing="0" class="display_meta">';
+            $html .= '<tbody>';
+            foreach( $gqs_product_attributes as $key => $attribute ) {
+                if( $attribute['value'] == '' ) {
+                    $attribute['value'] = 'Not Chosen';
+                }
+                $html .= '<tr>';
+                $html .= '<th style="text-transform: uppercase;">' . $attribute['name'] . ':</th>';
+                $html .= '<td><p>' . urldecode($attribute['value']) . '</p></td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+
+            echo $html;
+        }
+       
+    }
+
+    /**
+     * Save the custom product attributes when adding a partial variable product
+     * to the order item info for the quote
+     */
+    public function gqs_add_order_item_meta( $values, $cart_item_key, $item_id ) {
+
+        if( isset($values['gqs_product_attributes']) ) {
+
+            wc_add_order_item_meta( $item_id, '_gqs_product_attributes', $values['gqs_product_attributes'] );
+
+        }
+
+    }
+
     /**
      * Show the quote description in the order area
      */

@@ -166,10 +166,18 @@ $colspan = 0;
                                 $product_id  = '';
                                 $variation_description = '';
                                 if($_product->is_type('variable') || $_product->is_type('variation')) {
-                                    $product_id = $_product->get_parent_id();
-                                    $variation_description_raw = strip_tags($_product->get_variation_description());
-                                    if($variation_description_raw != '' && $variation_description_raw != null) {
-                                        $variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
+
+                                    // handle if the parent product was added without options
+                                    if($_product->get_parent_id() !== 0) {
+                                        $product_id = $_product->get_parent_id();
+                                        $variation_description_raw = strip_tags($_product->get_variation_description());
+                                        if($variation_description_raw != '' && $variation_description_raw != null) {
+                                            $variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
+                                        }
+                                    } else {
+                                        $product_short_description = $_product->get_short_description();
+
+                                        echo strip_tags( substr($_product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
                                     }
 
                                 } else if($_product->is_type('simple')) {
@@ -179,7 +187,7 @@ $colspan = 0;
                                     $product = wc_get_product($product_id);
                                     $product_short_description = $product->get_short_description();
 
-                                        echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+                                    echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
                                     
                                 }
                                 echo '</div>';
@@ -190,6 +198,7 @@ $colspan = 0;
 						   if ( $im ) {
 		                       $im->display();
 	                       } else {
+                                $strings = array();
                                 // wc_display_item_meta( $item );
                                 // Customized wc_display_item_meta funciton
                                 foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
@@ -199,10 +208,31 @@ $colspan = 0;
                                 if ( $strings ) {
                                     // $html = '<span style="display: block; height: 5px;">&nbsp;</span><ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
                                     $html = '<ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
+                                    echo $html;
                                 }
                         
-                                echo $html;
+                                
 	                       }
+                            
+                            //BEGIN GQS CUSTOM
+
+                            // get custom data that has been set for a variable product
+                            // that doesn't have all options selected
+                            $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
+
+                            if(is_array($gqs_product_attributes)) {
+                                echo '<ul class="wc-item-meta">';
+                                foreach ( $gqs_product_attributes as $key => $attribute ) {
+                                    if( $attribute['value'] == '' ) {
+                                        $attribute['value'] = 'Not Chosen';
+                                    }
+                                    echo '<li><strong>' . $attribute['name'] . ': </strong>' . urldecode($attribute['value']) . '</li>';
+                                }
+                                echo '</ul>';
+                            }
+
+                            //END GQS CUSTOM
+
 	                       ?></small>
                            
                            <?php 

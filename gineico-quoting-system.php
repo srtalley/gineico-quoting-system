@@ -4,7 +4,7 @@ Plugin Name: Gineico Quoting System
 Description: Adds features to the WooCommerce admin order screen and contains modifications to the YITH Request a Quote system.
 Author: Gineico
 Author URI: https://www.gineico.com.au
-Version: 1.5.2
+Version: 1.5.3
 Text Domain: gineico_quoting
 License: GPLv2
 */
@@ -41,7 +41,8 @@ class QuotingSystemController {
       // set the default settings
       // register_activation_hook( __FILE__, array($this, 'gineico_quoting_activation_hook' ));
 
-      // add_action( 'wp_enqueue_scripts', array( $this, 'gineico_quoting_register_styles_scripts' ), 1000 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'gineico_quoting_register_styles_scripts' ), 1000 );
+      
       // add_filter('get_gineico_quoting_main_settings', array($this, 'get_gineico_quoting_main_settings'));
       // add_filter('get_gineico_quoting_current_settings', array($this, 'get_gineico_quoting_current_settings'));
 
@@ -85,14 +86,21 @@ class QuotingSystemController {
 
     public function gineico_quoting_register_styles_scripts() {
 
-        $plugin_data = get_plugin_data( __FILE__ );
+      if(site_url() != "https://www.gineicomarine.com.au" && site_url() != "https://gineicomarine.dev.dustysun.com") {
 
-        wp_register_script('gineico-quoting-system-lookup', plugins_url('js/gineico-quoting-system-lookup.js', __FILE__), array('jquery'), $plugin_data['Version'], true);
-      
-        wp_localize_script( 'gineico-quoting-system-lookup', 'gineico_quoting_lookup', array(
-          'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-          'ajaxnonce' => wp_create_nonce( 'gineico_quoting_lookup' )
-        ) );
+        if(is_product()) {
+          $plugin_data = get_plugin_data( __FILE__ );
+
+          wp_enqueue_script('gineico-gqs-frontend', plugins_url('js/gineico-gqs-frontend.js', __FILE__), array('jquery'), $plugin_data['Version'], true);
+        
+          wp_localize_script( 'gineico-gqs-frontend', 'gineico_gqs_frontend', array(
+            'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+            'ajaxnonce' => wp_create_nonce( 'gineico_gqs_frontend' )
+          ) );
+        }
+
+      }
+
     }
 
     public function gineico_quoting_header() {
