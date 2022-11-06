@@ -23,6 +23,8 @@ jQuery(function($) {
         setupCustomShipping();
         addCustomVersionStringToPDFurl();
 
+        setupGQSAddVariableProductOptions();
+
     });
 
     /**
@@ -495,4 +497,125 @@ jQuery(function($) {
     }
 
 
+    /**
+     * Handle updating a parent product with the chosen variable options
+     */
+
+    function setupGQSAddVariableProductOptions() {
+
+        var backbone_modal;
+
+        $(document).on('click', '.gqs-replace-partial-variable-product', function(e){ 
+            e.preventDefault();
+            var gqs_update_item_id = $(this).data('item_id');
+            var gqs_update_product_id = $(this).data('product_id');
+            var gqs_update_order_id = $(this).data('order_id');
+			backbone_modal = $( this ).WCBackboneModal({
+				template: 'wc-modal-gqs-add-variation'
+			});
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: gqs_admin_shop_order_init.ajaxurl,
+                data: {
+                    'action': 'gqs_admin_popup_select_variation_options',
+                    'nonce': gqs_admin_shop_order_init.ajaxnonce,
+                    'item_id': gqs_update_item_id,
+                    'product_id': gqs_update_product_id,
+                    'order_id': gqs_update_order_id
+                },
+                complete: function(){
+                    $('#wc-backbone-modal-dialog').find('.gl-wcwl-quote-select-option-variation-loader').hide();
+                },
+                success: function(data) {
+                    $('#wc-backbone-modal-dialog').find('.gl-wcwl-quote-select-option-variation').html(data.html);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR + ' :: ' + textStatus + ' :: ' + errorThrown);
+                }
+            });
+        });
+
+        /**
+         * Fires on variation form load and selects the partially chosen customer
+         * attributes in the drop down if available
+         */
+        $( document ).on( "wc_variation_form", function ( event, variation ) {
+
+            var variation_form = $('#wc-backbone-modal-dialog').find('.variations_form');
+            var chosen_attributes = $('#wc-backbone-modal-dialog').find('.gqs-chosen-option');
+            $(chosen_attributes).each(function(index) {
+                var attribute = $(this).data('attribute');
+                var value = $(this).data('value');
+                var variation_form_select = $(variation_form).find('select[name="' + attribute +'"]');
+                var variation_form_select_value = $(variation_form_select).find('option[value="' + value + '"]');
+                $(variation_form_select_value).prop('selected', true);
+            });
+        });
+
+        /**
+         * Listens for the variations being seleccted and then enables the add button
+         */
+        $( document ).on( "show_variation", ".single_variation_wrap", function ( event, variation ) {
+            // Fired when the user selects all the required dropdowns / attributes
+            // and a final variation is selected / shown
+            if($('#wc-backbone-modal-dialog').find('.gqs-update-variable-product-in-order').length) {
+                $('#wc-backbone-modal-dialog').find('.gqs-update-variable-product-in-order').removeAttr("disabled");
+            }
+        });
+        
+
+        /**
+         * Add an item with a variation ID to the list and remove the original product
+         */
+        $( document ).on('click', '.gqs-update-variable-product-in-order', function (e) {
+            e.preventDefault();
+
+            var wc_modal = $(this).parentsUntil('#wc-backbone-modal-dialog').parent();
+
+            var item_id = $(wc_modal).find('.gqs_item_id').val();
+            var order_id = $(wc_modal).find('.gqs_order_id').val();
+            var replace_item = $(wc_modal).find('input[name="gqs-replace-item"]').prop("checked");
+            var variations_form = $(wc_modal).find('.variations_form');
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: gqs_admin_shop_order_init.ajaxurl,
+                data: {
+                    'action': 'gqs_admin_add_selected_variation',
+                    'nonce': gqs_admin_shop_order_init.ajaxnonce,
+                    'item_id': item_id,
+                    'order_id': order_id,
+                    'replace_item': replace_item,
+                    'variations_form': $(variations_form).serialize()
+                },
+                beforeSend: function(){
+                    $('#wc-backbone-modal-dialog .gqs-update-variable-product-in-order').prop('disabled', true);
+                    // block($(popup_window).find('.gl-wcwl-quote-select-option-variation'));
+                },
+                complete: function(){
+                    $('#wc-backbone-modal-dialog .modal-close').click();
+                    // unblock($(popup_window).find('.gl-wcwl-quote-select-option-variation'));
+                },
+                success: function(data) {
+                    if(data.result == 'success') {
+                        $( '#woocommerce-order-items' ).trigger('wc_order_items_reload');
+                        $( '#woocommerce-order-items' ).trigger('wc_order_items_reloaded');
+                        setTimeout(function() {
+                            jQuery('html, body').animate({
+                                scrollTop: jQuery("#order_line_items > tr:last-of-type").offset().top - 100
+                            }, 2000);
+                        }, 2000);
+
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR + ' :: ' + textStatus + ' :: ' + errorThrown);
+                }
+            });
+
+        });
+
+    }
 });

@@ -48,6 +48,30 @@ $show_reject_link = get_option( 'ywraq_show_reject_link' ) !== 'no';
 		display: table-cell;
 		vertical-align: middle;
 	}
+	.product-name-wrapper small {
+		font-size: 13px !important;
+		line-height: 20px !important;
+	}
+	.product-name-wrapper small p {
+		font-size: 13 !important;
+		margin: 0;
+	}
+	.product-name-wrapper .wc-item-meta {
+		margin-top: 10px !important;
+		display: block;
+	}
+	.product-name-wrapper .wc-item-meta br:first-child {
+		display: none;
+	}
+	.product-name-wrapper small li {
+		margin: 0 !important;
+	}
+	.product-name-wrapper small strong {
+		text-transform: uppercase;
+	}
+	.product-name-wrapper small li:last-child {
+		margin: 0 !important;
+	}
 	.wc-item-meta p {
 		display: inline-block;
 	}
@@ -78,7 +102,6 @@ $show_reject_link = get_option( 'ywraq_show_reject_link' ) !== 'no';
 <!-- BEGIN GQS CUSTOM -->
 <!-- <h2 class="quote-title"><?php //printf( ( '%1$s n. %2$s' ), apply_filters( 'wpml_translate_single_string', esc_html( $email_title ), 'admin_texts_woocommerce_ywraq_send_quote_settings', '[woocommerce_ywraq_send_quote_settings]email-title', $raq_data['lang'] ),  esc_html( $raq_data['order-number'] ) ); // phpcs:ignore ?></h2> -->
 <!-- END GQS CUSTOM -->
-
 <p><?php echo apply_filters( 'wpml_translate_single_string', wp_kses_post( nl2br( $email_description ) ), 'admin_texts_woocommerce_ywraq_send_quote_settings', '[woocommerce_ywraq_send_quote_settings]email-description', $raq_data['lang'] ); // phpcs:ignore ?></p>
 
 <!-- BEGIN GQS CUSTOM -->

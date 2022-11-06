@@ -16,10 +16,14 @@
  */
 
 $mail_options      = get_option( 'woocommerce_ywraq_email_settings' );
+//BEGIN GQS CUSTOM
 // get the raq_data from the db if not defined 
 if(!is_array($raq_data)) {
-	$raq_data = get_post_meta($raq_data, '_raq_request', true); 
+	$order_id = $raq_data;
+	$raq_data = get_post_meta($raq_data, '_raq_request', true);
+	$raq_data['order_id'] = $order_id;
 }
+//END GQS CUSTOM
 $order_id          = $raq_data['order_id'];
 $order             = wc_get_order( $order_id ); //phpcs:ignore
 $customer          = $order ? $order->get_meta( '_customer_user' ) : 0;
@@ -47,11 +51,36 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 	}
 	.thumb-wrapper{
 		display: table-cell;
-		margin-right:15px;
+		margin-right: 30px;
+		width: 100px;
 	}
 	.product-name-wrapper{
 		display: table-cell;
 		vertical-align: middle;
+	}
+	.product-name-wrapper small {
+		font-size: 13px !important;
+		line-height: 20px !important;
+	}
+	.product-name-wrapper small p {
+		font-size: 13 !important;
+		margin: 0;
+	}
+	.product-name-wrapper .wc-item-meta {
+		margin-top: 10px !important;
+		display: block;
+	}
+	.product-name-wrapper .wc-item-meta br:first-child {
+		display: none;
+	}
+	.product-name-wrapper small li {
+		margin: 0 !important;
+	}
+	.product-name-wrapper small strong {
+		text-transform: uppercase;
+	}
+	.product-name-wrapper small li:last-child {
+		margin: 0 !important;
 	}
 	.table-wrapper {
 		margin: 30px 0;

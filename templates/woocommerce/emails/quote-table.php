@@ -160,14 +160,103 @@ $show_permalinks = apply_filters( 'ywraq_list_show_product_permalinks', true, 'p
                     //     echo  wp_kses_post( apply_filters( 'ywraq_sku_label_html', $sku, $_product ) ); //phpcs:ignore
 					// }
 					// END GQS CUSTOM
-					?>
 
+					//BEGIN GQS CUSTOM
+					// see if the item order meta quote description is set
+					$quote_description = wc_get_order_item_meta($item_id, '_gqs_quote_description_custom', true);
+					if($quote_description == '') {
+						// see if the quote description is set 
+						$quote_description = get_post_meta($_product->get_id(), 'quote_description', true);
+
+						if($_product->get_type() == 'variation') {
+							if($quote_description == '') {
+								// try to get the parent desc
+								$parent_id = $_product->get_parent_id();
+								$quote_description = get_post_meta($parent_id, 'quote_description', true);
+							}
+						} 
+					}
+					// convert line breaks to paragraphs
+					$quote_description = wpautop($quote_description);
+					?>
+					<small>
+							<?php
+							//BEGIN GQS CUSTOM	
+
+							if($quote_description != ''):
+								echo '<div class="quote-description">';
+								echo $quote_description;
+								echo '</div>';
+							else:
+
+								echo '<div class="product-description">';
+								$product_id  = '';
+								$variation_description = '';
+								if($_product->is_type('variable') || $_product->is_type('variation')) {
+
+									// handle if the parent product was added without options
+									if($_product->get_parent_id() !== 0) {
+										$product_id = $_product->get_parent_id();
+										$variation_description_raw = strip_tags($_product->get_variation_description());
+										if($variation_description_raw != '' && $variation_description_raw != null) {
+											$variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
+										}
+									} else {
+										$product_short_description = $_product->get_short_description();
+
+										echo strip_tags( substr($_product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+									}
+
+								} else if($_product->is_type('simple')) {
+									$product_id = $_product->get_id();
+								}
+								if($product_id != '') {
+									$product = wc_get_product($product_id);
+									$product_short_description = $product->get_short_description();
+
+									echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+									
+								}
+								echo '</div>';
+								echo $variation_description;
+							endif;
+
+
+						// get custom data that has been set for a variable product
+						// that doesn't have all options selected
+						$gqs_product_attributes = $item['gqs_product_attributes'];
+
+						if(is_array($gqs_product_attributes)) {
+							echo '<ul class="wc-item-meta">';
+							foreach ( $gqs_product_attributes as $key => $attribute ) {
+								if( $attribute['value'] == '' ) {
+									$attribute['value'] = 'Not Chosen';
+								}
+								echo '<li><strong>' . $attribute['name'] . ': </strong>' . urldecode($attribute['value']) . '</li>';
+							}
+							echo '</ul>';
+						}
+						
+				?></small>
 				<small>
 					<?php
 					if ( $im ) {
 						$im->display();
 					} else {
-						wc_display_item_meta( $item );
+							//BEGIN GQS CUSTOM
+							// wc_display_item_meta( $item );
+							// Customized wc_display_item_meta function
+							$strings = array();
+							foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
+								$value     = strip_tags(trim( $meta->display_value ));
+								$strings[] = '<span class="wc-item-meta-label" style="display: inline-block"><strong>' . wp_kses_post( $meta->display_key ) . ':</strong></span>&nbsp;<span class="wc-item-meta-value" style="display: inline-block">' . $value . '</span>';
+							}
+							if ( $strings ) {
+								// $html = '<span style="display: block; height: 5px;">&nbsp;</span><ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
+								$html = '<ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
+								echo $html;
+							}
+							//END GQS CUSTOM
 					}
 					?>
 				</small>

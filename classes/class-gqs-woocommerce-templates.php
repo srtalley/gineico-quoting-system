@@ -7,6 +7,8 @@ class GQS_WooCommerce_Templates {
   
     public function __construct() {
         add_filter( 'woocommerce_locate_template', array( $this, 'woocommerce_locate_template' ), 10, 3 );
+
+        add_filter( 'ywraq_item_data', array($this, 'modify_ywraq_item_data'), 10, 3 );
     }
     /**
      * Add WooCommerce template location
@@ -94,6 +96,19 @@ class GQS_WooCommerce_Templates {
         return $html;
     }
    
+    /**
+     * Modify the output of the YWRAQ function for product attributes
+     */
+    public function modify_ywraq_item_data($item_data, $raq, $show_price ) {
+
+        // make sure that HTML is not filtered out with this filter
+        add_filter( 'ywraq_meta_data_do_escape', '__return_false' );
+        foreach($item_data as $key => $item) {
+            $item['key'] = '<strong>' . $item['key'] . '</strong>';
+            $item_data[$key] = $item;
+        }
+        return $item_data;
+    }
 } // end class
 
 $gqs_woocommerce_templates = new GQS_WooCommerce_Templates();

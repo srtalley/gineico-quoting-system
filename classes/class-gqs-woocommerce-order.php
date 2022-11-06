@@ -41,6 +41,15 @@ class GQS_WooCommerce_Order {
         // show the product options for parent products that were added with selected options
         add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_parent_product_select_options'), 10, 3 );
 
+        add_action( 'woocommerce_admin_order_items_after_line_items', array($this, 'gqs_add_variable_product_template'), 10, 1 );
+        // Ajax to show variation form for products to select options 
+        // for the quote
+        // add_action( 'wp_ajax_nopriv_gl_popup_select_variation_options', array($this, 'gl_popup_select_variation_options') );
+        add_action( 'wp_ajax_gqs_admin_popup_select_variation_options', array($this, 'gqs_admin_popup_select_variation_options') );
+
+        add_action( 'wp_ajax_gqs_admin_add_selected_variation', array($this, 'gqs_admin_add_selected_variation') );
+
+
         // add the custom product attributes in the order admin screen
         add_action( 'ywraq_from_cart_to_order_item', array( $this, 'gqs_add_order_item_meta' ), 11, 3 );
 
@@ -135,14 +144,16 @@ class GQS_WooCommerce_Order {
         if(is_a($item, 'WC_Order_Item_Product')) {
             $item_id = $item->get_id();
             // The WC_Product object
-            $product = $item->get_product(); 
-            $sku = $product->get_sku();
-            if($sku == '') {
-                $sku = ' ';
+            if(is_object($product)) {
+                $product = $item->get_product(); 
+                $sku = $product->get_sku();
+                if($sku == '') {
+                    $sku = ' ';
+                }
+        
+                $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_type');
+                $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_part_number', $sku);
             }
-    
-            $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_type');
-            $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_part_number', $sku);
         }
 
     }
@@ -441,11 +452,24 @@ class GQS_WooCommerce_Order {
 
         $plugin_data = get_plugin_data( GINEICO_QUOTING_SYSTEM__FILE__ );
 
-        wp_enqueue_script( 'gineico-qs-admin', plugins_url('/js/gineico-gqs-admin.js', GINEICO_QUOTING_SYSTEM__FILE__), array('jquery'), $plugin_data['Version'], true );
-        wp_localize_script( 'gineico-qs-admin', 'gqs_admin_shop_order_init', array(
+        wp_enqueue_style( 'gineico-gqs-admin', plugins_url('/css/gineico-gqs-admin.css', GINEICO_QUOTING_SYSTEM__FILE__), $plugin_data['Version'], true );
+
+        wp_enqueue_script( 'gineico-gqs-admin', plugins_url('/js/gineico-gqs-admin.js', GINEICO_QUOTING_SYSTEM__FILE__), array('jquery'), $plugin_data['Version'], true );
+
+        wp_localize_script( 'gineico-gqs-admin', 'gqs_admin_shop_order_init', array(
             'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-            'ajaxnonce' => wp_create_nonce( 'gqs_mods_init_nonce' )
+            'ajaxnonce' => wp_create_nonce( 'gqs_admin_shop_order_init_nonce' )
         ) );
+
+        // load the WooCommerce prettyPhoto script and style
+        // if(SCRIPT_DEBUG === true) {
+        //     $suffix  = '.min';
+        // } else {
+        //     $suffix = '';
+        // }
+        // wp_enqueue_script( 'woocommerce-prettyphoto', plugins_url('/assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js', WP_PLUGIN_DIR . '/woocommerce/woocommerce.php'), $plugin_data['Version'], true );
+
+        // wp_enqueue_style( 'woocommerce-prettyphoto', plugins_url('/assets/css/prettyPhoto.css', WP_PLUGIN_DIR . '/woocommerce/woocommerce.php'), array(), $plugin_data['Version'] );
 
     }
 
@@ -728,11 +752,12 @@ class GQS_WooCommerce_Order {
         return 'no';
     }
 
-        /**
-     * Show the options selected when adding parent products with only partial options added
+    /**
+     * Show the options selected when adding parent products with only partial options added.
+     * Added a replace product link to add variations
      */
     public function gqs_show_parent_product_select_options($item_id, $item, $product) {
-        
+
         // see if the product attributes key exists
         $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
 
@@ -751,13 +776,244 @@ class GQS_WooCommerce_Order {
             }
             $html .= '</tbody>';
             $html .= '</table>';
+            $html .= '<a href="#" class="gqs-replace-partial-variable-product" data-item_id="' . $item_id . '" data-product_id="' . $product->get_id() . '" data-order_id="' . $item->get_order_id() . '">Replace Product</a>';
+
+            // $html .= '<input type="hidden" class="gqs-product-attributes" value=\'' . json_encode($gqs_product_attributes) . '\'>';
+            // $html .= '<a href="#gqs-replace-partial-variable-product-' . $item_id . '" class="gqs-replace-partial-variable-product" data-item_id="' . $item_id . '" data-product_id="' . $product->get_id() . '" data-order_id="' . $item->get_order_id() . '" data-gqs_product_attributes=\'' . json_encode($gqs_product_attributes) . '\'>Replace Product</a>';
+            // $html .= '<div id="gqs-replace-partial-variable-product-' . $item_id . '" >';
+            // $html .= '<div class="gl-wcwl-quote-select-option-variation"></div>';
+            // $html .= '<div class="gl-wcwl-select-option-variation-message"></div>';
+            // $html .= '<div class="gl-wcwl-quote-select-option-variation-loader"></div>';
             $html .= '</div>';
 
             echo $html;
         }
        
     }
+    /**
+     * Template used by WCBackboneModal to show the popup in the admin area
+     */
+    public function gqs_add_variable_product_template() {
+        ?>
+            <script type="text/template" id="tmpl-wc-modal-gqs-add-variation">
+                <div class="wc-backbone-modal gqs-replace-variation">
+                    <div class="wc-backbone-modal-content">
+                        <section class="wc-backbone-modal-main" role="main">
+                            <header class="wc-backbone-modal-header">
+                                <h1><?php esc_html_e( 'Add Variation', 'woocommerce' ); ?></h1>
+                                <button class="modal-close modal-close-link dashicons dashicons-no-alt">
+                                    <span class="screen-reader-text">Close modal panel</span>
+                                </button>
+                            </header>
+                            <article>
+                            <div class="gl-wcwl-quote-select-option-variation"></div>
+                            <div class="gl-wcwl-select-option-variation-message"></div>
+                            <div class="gl-wcwl-quote-select-option-variation-loader"></div>
+                            </article>
+                            <footer>
+                                <div class="inner">
+                                    <div class="gqs-modal-footer">
+                                        <div class="gqs-replace-item-checkbox-wrapper">
+                                            <label><input type="checkbox" name="gqs-replace-item" checked="true"> Replace existing item</label>
+                                        </div>
+                                        <button id="gqs-update-variable-product-in-order" class="button button-primary button-large gqs-update-variable-product-in-order" disabled><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
+                                    </div>
+                                </div>
+                            </footer>
+                        </section>
+                    </div>
+                </div>
+                <div class="wc-backbone-modal-backdrop modal-close"></div>
+            </script>
+        <?php 
+    }
 
+    /**
+     * Show the variation selection options via Ajax
+     * NOTE: The wp-util scripts must be called so make sure that is a
+     * dependency on the JS file containing the JS that calls this Ajax
+     */
+    public function gqs_admin_popup_select_variation_options() {
+
+        $nonce_check = check_ajax_referer( 'gqs_admin_shop_order_init_nonce', 'nonce' );
+
+        $item_id = sanitize_text_field($_POST['item_id']);
+        $product_id = sanitize_text_field($_POST['product_id']);
+        $order_id = sanitize_text_field($_POST['order_id']);
+
+        $html = '';
+
+        // First we must manually add the variation js scripts or 
+        // this won't work in Ajax
+        $html .= "<script type='text/javascript' id='wc-add-to-cart-variation-js-extra'>
+        /* <![CDATA[ */";
+        $html .= 'var wc_add_to_cart_variation_params = {"wc_ajax_url":"\/?wc-ajax=%%endpoint%%","i18n_no_matching_variations_text":"Sorry, no products matched your selection. Please choose a different combination.","i18n_make_a_selection_text":"Please select some product options before adding this product to your cart.","i18n_unavailable_text":"Sorry, this product is unavailable. Please choose a different combination."};
+        /* ]]> */
+        </script>';
+
+        $html .= "<script type='text/javascript' src='" . plugins_url( 'assets/js/frontend/add-to-cart-variation.js', WC_PLUGIN_FILE) . "' id='gl-wc-add-to-cart-variation-js'></script>";
+
+        // Next get the variation template which adds some more JS
+        ob_start();
+        wc_get_template( 'single-product/add-to-cart/variation.php' );
+        $html .= ob_get_clean();
+
+        $html .= $this->gqs_add_variable_product_form(array('id' => $product_id, 'item_id' => $item_id, 'order_id' => $order_id));
+        
+        $return_arr = array(
+            'html' => $html
+        );
+        wp_send_json($return_arr);
+    }
+    /**
+     * Displays an add to order form
+     */
+    public function gqs_add_variable_product_form( $atts ) {
+		if ( empty( $atts ) ) {
+			return '';
+		}
+
+		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) {
+			return '';
+		}
+
+        $args = array(
+			'posts_per_page'      => 1,
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
+			'no_found_rows'       => 1,
+		);
+
+		if ( isset( $atts['id'] ) ) {
+			$args['p'] = absint( $atts['id'] );
+		}
+
+		$single_product = new \WP_Query( $args );
+
+		$preselected_id = '0';
+
+		// For "is_single" to always make load comments_template() for reviews.
+		$single_product->is_single = true;
+
+		ob_start();
+
+		global $wp_query;
+
+		// Backup query object so following loops think this is a product page.
+		$previous_wp_query = $wp_query;
+		// @codingStandardsIgnoreStart
+		$wp_query          = $single_product;
+		// @codingStandardsIgnoreEnd
+		wp_enqueue_script( 'wc-single-product' );
+
+		while ( $single_product->have_posts() ) {
+			$single_product->the_post();
+			?>
+			<div class="single-product <?php echo get_the_ID(); ?>" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
+            <h3 class="product-title">Product: <?php echo get_the_title(); ?></h3>
+				<?php 
+
+                $item = new \WC_Order_Item_Product($atts['item_id']);
+                // show the customer chosen options
+                $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
+
+                if(is_array($gqs_product_attributes)) { 
+                    ?>
+                    <div class="gqs-chosen-options-wrapper"><p>Options chosen by customer: </p>
+                    <?php
+                        foreach( $gqs_product_attributes as $key => $attribute ) {
+                            
+                            if( $attribute['value'] == '' ) {
+                                $attribute['value'] = 'Not Chosen';
+                            }
+                            ?>
+                            <div class="gqs-chosen-option" data-attribute="<?php echo $key; ?>" data-value="<?php echo urldecode($attribute['value']); ?>">
+                                <div class="gqs-chosen-option-label"><?php echo $attribute['name']; ?></div>
+                                <div class="gqs-chosen-option-value"><?php echo urldecode($attribute['value']); ?></div>
+                            </div>
+                        <?php
+                        }
+                        ?>
+                    </div> <!-- .gqs-chosen-options -->
+                <?php 
+                } // end if is_array
+                ?>
+                <div class="gqs-choose-options-title"><h3>Choose options to add variation:</h3></div>
+                <?php
+
+                woocommerce_template_single_add_to_cart(); 
+
+                ?>
+   
+                <input type="hidden" class="gqs_order_id" value="<?php echo $atts['order_id']; ?>">
+                <input type="hidden" class="gqs_item_id" value="<?php echo $atts['item_id']; ?>">
+
+                <p>Note: This will add the product with these options at the bottom of the product list. Uncheck the "Replace existing item" checkbox if you wish to keep the product the customer added without all of the options selected.</p>
+
+			</div>
+			<?php
+		}
+
+		// Restore $previous_wp_query and reset post data.
+		// @codingStandardsIgnoreStart
+		$wp_query = $previous_wp_query;
+		// @codingStandardsIgnoreEnd
+		wp_reset_postdata();
+
+		return '<div class="woocommerce">' . ob_get_clean() . '</div>';
+    }
+    /**
+     * Ajax to add selected variable item to the order and optionally replace an incomplete item
+     */
+    public function gqs_admin_add_selected_variation() {
+        
+        $nonce_check = check_ajax_referer( 'gqs_admin_shop_order_init_nonce', 'nonce' );
+
+        parse_str(urldecode(sanitize_text_field($_POST['variations_form'])), $variations_form);
+        $product_id = $variations_form['product_id'];
+        $variation_id = $variations_form['variation_id'];
+        $item_id = sanitize_text_field($_POST['item_id']);
+        $order_id = sanitize_text_field($_POST['order_id']);
+        $replace_item = sanitize_text_field($_POST['replace_item']);
+
+        $order = wc_get_order( $order_id );
+
+        $variation_to_add = wc_get_product($variation_id);
+
+        $new_item_id = $order->add_product( $variation_to_add, 1 );
+
+        // get the variation attributes and assign them to the line 
+        // item if they exist in the form
+        foreach($variation_to_add->get_attributes() as $key => $attribute) {
+            $attribute_key = 'attribute_' . sanitize_title( $key );
+            if ( isset( $variations_form[ $attribute_key ] ) ) {
+                wc_update_order_item_meta( $new_item_id, $key, $variations_form[ $attribute_key ] );
+            }
+        }
+
+        if($replace_item == 'true') {
+
+            // uncomment to retain customer selected options
+            // $item = new \WC_Order_Item_Product($item_id);
+            // $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
+            // wc_update_order_item_meta($new_item_id, '_gqs_product_attributes', $gqs_product_attributes);
+
+            wc_delete_order_item($item_id);
+
+        }
+
+        $order->calculate_totals();
+
+        $order->save();
+
+        $return_arr = array(
+            'result' => 'success'
+        );
+
+        wp_send_json($return_arr);
+
+    }
     /**
      * Save the custom product attributes when adding a partial variable product
      * to the order item info for the quote
@@ -765,9 +1021,7 @@ class GQS_WooCommerce_Order {
     public function gqs_add_order_item_meta( $values, $cart_item_key, $item_id ) {
 
         if( isset($values['gqs_product_attributes']) ) {
-
             wc_add_order_item_meta( $item_id, '_gqs_product_attributes', $values['gqs_product_attributes'] );
-
         }
 
     }

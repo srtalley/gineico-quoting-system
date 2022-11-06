@@ -70,7 +70,7 @@ $colspan = 0;
         if( ! empty( $items ) ):
 
             foreach( $items as $item_id => $item ):
-              
+
                 if( isset( $item['variation_id']) && $item['variation_id'] ){
                     $_product = wc_get_product( $item['variation_id'] );
                 }else{
@@ -198,9 +198,10 @@ $colspan = 0;
 						   if ( $im ) {
 		                       $im->display();
 	                       } else {
-                                $strings = array();
+                                //BEGIN GQS CUSTOM
                                 // wc_display_item_meta( $item );
-                                // Customized wc_display_item_meta funciton
+                                // Customized wc_display_item_meta function
+                                $strings = array();
                                 foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
                                     $value     = strip_tags(trim( $meta->display_value ));
                                     $strings[] = '<span class="wc-item-meta-label" style="display: inline-block"><strong>' . wp_kses_post( $meta->display_key ) . ':</strong></span>&nbsp;<span class="wc-item-meta-value" style="display: inline-block">' . $value . '</span>';
@@ -210,8 +211,7 @@ $colspan = 0;
                                     $html = '<ul class="wc-item-meta"><li>' . implode( '</li><li>', $strings ) . '</li></ul>';
                                     echo $html;
                                 }
-                        
-                                
+                                //END GQS CUSTOM
 	                       }
                             
                             //BEGIN GQS CUSTOM

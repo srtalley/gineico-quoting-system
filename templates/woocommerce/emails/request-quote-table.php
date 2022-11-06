@@ -9,12 +9,21 @@
  * @package YITH Woocommerce Request A Quote
  * @var $raq_data array
  */
+//BEGIN GQS CUSTOM
+// get the raq_data from the db if not defined 
+if(!is_array($raq_data)) {
+	$order_id = $raq_data;
+	$raq_data = get_post_meta($raq_data, '_raq_request', true);
+	$raq_data['order_id'] = $order_id;
+}
+//END GQS CUSTOM
 $show_price        = true;
 $show_total_column = false; //ywraq_show_element_on_list( 'line_total' );
 $email_type        = isset( $email_type ) ? $email_type : 'ywraq_email';
 $total             = 0;
 $total_tax         = 0;
 
+//BEGIN GQS CUSTOM
 $quote_number     = apply_filters( 'ywraq_quote_number', $raq_data['order_id'] );
 $tax_display_list = apply_filters( 'ywraq_tax_display_list', get_option( 'woocommerce_tax_display_cart' ) );
 $text_align       = is_rtl() ? 'right' : 'left';
@@ -143,25 +152,103 @@ if ( ! empty( $raq_data['raq_content'] ) ) : ?>
 					<?php endif ?>
 
 					<?php
-					if ( $_product->get_sku() !== '' && ywraq_show_element_on_list( 'sku' ) ) {
-						$sku = '<br/><small>' . apply_filters( 'ywraq_sku_label', __( ' SKU:', 'yith-woocommerce-request-a-quote' ) ) . $_product->get_sku() . '</small>';
-                        echo wp_kses_post(apply_filters('ywraq_sku_label_html', $sku, $_product)); //phpcs:ignore
-					}
+					// BEGIN GQS CUSTOM
+					// if ( $_product->get_sku() !== '' && ywraq_show_element_on_list( 'sku' ) ) {
+					// 	$sku = '<br/><small>' . apply_filters( 'ywraq_sku_label', __( ' SKU:', 'yith-woocommerce-request-a-quote' ) ) . $_product->get_sku() . '</small>';
+                    //     echo wp_kses_post(apply_filters('ywraq_sku_label_html', $sku, $_product)); //phpcs:ignore
+					// }
+					//END GQS CUSTOM
 					?>
 
-
 					<?php do_action( 'ywraq_request_quote_email_view_item_after_title', $item, $raq_data, $key ); ?>
-					<?php if ( isset( $item['variations'] ) || ( ! is_array( $item ) && isset( $item->get_data()['variation_id'] ) && (int) $item->get_data()['variation_id'] > 0 ) || isset( $item['addons'] ) || isset( $item['yith_wapo_options'] ) ) : ?>
-						<small style="line-height: 1em">
+
+					<?php 
+					//BEGIN GQS CUSTOM
+					// see if the quote description is set 
+					$quote_description = get_post_meta($_product->get_id(), 'quote_description', true);
+
+					if($_product->get_type() == 'variation') {
+						if($quote_description == '') {
+							// try to get the parent desc
+							$parent_id = $_product->get_parent_id();
+							$quote_description = get_post_meta($parent_id, 'quote_description', true);
+						}
+					} 
+
+					// convert line breaks to paragraphs
+					$quote_description = wpautop($quote_description);
+					?>
+					<small>
 							<?php
-							echo yith_ywraq_get_product_meta(
-								$item,
-								true,
-								$show_price
-							); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							?>
-						</small>
-					<?php endif ?>
+							//BEGIN GQS CUSTOM	
+
+							if($quote_description != ''):
+								echo '<div class="quote-description">';
+								echo $quote_description;
+								echo '</div>';
+							else:
+
+								echo '<div class="product-description">';
+								$product_id  = '';
+								$variation_description = '';
+								if($_product->is_type('variable') || $_product->is_type('variation')) {
+
+									// handle if the parent product was added without options
+									if($_product->get_parent_id() !== 0) {
+										$product_id = $_product->get_parent_id();
+										$variation_description_raw = strip_tags($_product->get_variation_description());
+										if($variation_description_raw != '' && $variation_description_raw != null) {
+											$variation_description = '<ul class="wc-item-meta"><li><p><strong class="wc-item-meta-label" style="vertical-align: top;">Description:&nbsp;</strong>' . $variation_description_raw . '</p></li></ul>';
+										}
+									} else {
+										$product_short_description = $_product->get_short_description();
+
+										echo strip_tags( substr($_product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+									}
+
+								} else if($_product->is_type('simple')) {
+									$product_id = $_product->get_id();
+								}
+								if($product_id != '') {
+									$product = wc_get_product($product_id);
+									$product_short_description = $product->get_short_description();
+
+									echo strip_tags( substr($product->get_short_description(), 0 , 110)) . '&hellip; <a style="text-decoration: none; color: ' . $primary_link_color . ';" target="_blank" href="' . esc_url( $_product->get_permalink() ) . '">Read More</a>';
+									
+								}
+								echo '</div>';
+								echo $variation_description;
+							endif;
+
+
+						// get custom data that has been set for a variable product
+						// that doesn't have all options selected
+						$gqs_product_attributes = $item['gqs_product_attributes'];
+
+						if(is_array($gqs_product_attributes)) {
+							echo '<ul class="wc-item-meta">';
+							foreach ( $gqs_product_attributes as $key => $attribute ) {
+								if( $attribute['value'] == '' ) {
+									$attribute['value'] = 'Not Chosen';
+								}
+								echo '<li><strong>' . $attribute['name'] . ': </strong>' . urldecode($attribute['value']) . '</li>';
+							}
+							echo '</ul>';
+						}
+						
+				?></small>
+				<?php if ( isset( $item['variations'] ) || ( ! is_array( $item ) && isset( $item->get_data()['variation_id'] ) && (int) $item->get_data()['variation_id'] > 0 ) || isset( $item['addons'] ) || isset( $item['yith_wapo_options'] ) ) : ?>
+					<small style="line-height: 1em" class="wc-item-meta">
+						<?php
+						echo yith_ywraq_get_product_meta(
+							$item,
+							true,
+							$show_price
+						); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+					</small>
+				<?php endif ?>
+				<?php //END GQS CUSTOM ?>
 				</div>
 				</td>
 				<td scope="col" class="column-quantity td"><?php echo esc_html( $item['quantity'] ); ?></td>

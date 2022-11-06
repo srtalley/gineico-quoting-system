@@ -10,14 +10,12 @@ jQuery(function($) {
      * Observe and remove the disabled class from the YWRAQ button
      */
     function removeDisabledYwraqButton() {
-        console.log('chongwhip');
 
         $('.add-request-quote-button.button').removeClass('disabled');
             // Create an observer instance
             var observer = new MutationObserver(function( mutations ) {
                 mutations.forEach(function( mutation ) {		
                     if(mutation.attributeName == "class"){
-                        console.log(mutation);
                         if($(mutation.target).hasClass('disabled')) {
                             $(mutation.target).removeClass('disabled')
                         } 

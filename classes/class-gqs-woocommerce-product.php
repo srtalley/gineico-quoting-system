@@ -328,7 +328,6 @@ class GQS_WooCommerce_Product {
         // get the product 
         $product = wc_get_product( $product_raq['product_id'] );
         if($product->get_type() == 'variable' && $product_raq['variation_id'] == '') {
-
             $gqs_product_attributes = array();
             foreach($product_raq as $key => $value) {
                 if( substr( $key, 0, 9 ) === 'attribute' ) {
@@ -343,7 +342,6 @@ class GQS_WooCommerce_Product {
 
             $raq['gqs_product_attributes'] = $gqs_product_attributes;
         }
-
         return $raq;
     }
     /** 

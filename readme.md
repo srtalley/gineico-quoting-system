@@ -3,6 +3,9 @@ Gineico Quoting System
 
 Adds changes to the WooCommerce admin order area and contains modifications for the YITH Request a Quote plugin. 
 
+## v1.5.4 - 2022-11-05
+* Adds the ability to replace an item that a customer added without choosing all of the options via a lightbox in the admin area.
+
 ## v1.5.3 - 2022-10-14
 * Updates to allow adding a product to the quote without choosing all of the options.
 * Updated request-quote-table.php template.
