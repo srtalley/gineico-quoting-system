@@ -5,6 +5,7 @@ Adds changes to the WooCommerce admin order area and contains modifications for 
 
 ## v1.5.5 - 2022-11-07
 * Updated to retain the price, quote description, and other order item meta when adding or replacing the variation.
+* Updated the customer email template.
 
 ## v1.5.4 - 2022-11-05
 * Adds the ability to replace an item that a customer added without choosing all of the options via a lightbox in the admin area.

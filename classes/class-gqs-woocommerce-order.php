@@ -763,11 +763,7 @@ class GQS_WooCommerce_Order {
         $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
 
         if(is_array($gqs_product_attributes)) {
-            // wl($item->get_subtotal());
-            // wl($item->get_meta_data());
-            // foreach ($item->get_meta_data() as $data) {
-            //     wl($data->get_data());
-            // }
+
             $html = '<div class="view">';
             $html .= '<table cellspacing="0" class="display_meta">';
             $html .= '<tbody>';
