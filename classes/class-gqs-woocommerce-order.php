@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 namespace Gineicio\QuotingSystem;
 
 class GQS_WooCommerce_Order {
-  
+
     public function __construct() {
-        
+
         if(site_url() != "https://www.gineicomarine.com.au" && site_url() != "https://gineicomarine.dev.dustysun.com") {
             // Add a meta key to the request a quote items
             add_action( 'ywraq_from_cart_to_order_item', array($this, 'gqs_ywraq_from_cart_to_order_item'), 10, 4 );
@@ -21,12 +21,12 @@ class GQS_WooCommerce_Order {
         }
         // Change certain text strings
         add_filter( 'gettext', array($this,'change_text_strings'), 20, 3 );
-        
+
         add_action( 'current_screen', array($this,'gqs_woocommerce_order_admin'), 10, 1 );
 
         // Save the PDF name on a new quote
         add_action( 'woocommerce_new_order', array($this, 'gqs_add_pdf_name_new_order'), 10, 1 );
-        
+
         // update the PDF name on save
         // add_action( 'save_post', array($this, 'gqs_update_pdf_name'), 9999 );
 
@@ -42,7 +42,7 @@ class GQS_WooCommerce_Order {
         add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_parent_product_select_options'), 10, 3 );
 
         add_action( 'woocommerce_admin_order_items_after_line_items', array($this, 'gqs_add_variable_product_template'), 10, 1 );
-        // Ajax to show variation form for products to select options 
+        // Ajax to show variation form for products to select options
         // for the quote
         // add_action( 'wp_ajax_nopriv_gl_popup_select_variation_options', array($this, 'gl_popup_select_variation_options') );
         add_action( 'wp_ajax_gqs_admin_popup_select_variation_options', array($this, 'gqs_admin_popup_select_variation_options') );
@@ -56,13 +56,13 @@ class GQS_WooCommerce_Order {
         // show the quote description in the order area
         add_action( 'woocommerce_before_order_itemmeta', array($this, 'gqs_show_quote_description'), 10, 3 );
 
-        // add the original price to the admin order 
+        // add the original price to the admin order
         add_action( 'woocommerce_admin_order_item_headers', array($this, 'gqs_show_original_price_header'), 10, 1 );
         add_action( 'woocommerce_admin_order_item_values', array($this, 'gqs_show_original_price_value'), 10, 3 );
 
-        // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area 
+        // add a field for the admin orders to show the price without a voucher column and add the GST field to the order area
         add_action( 'woocommerce_admin_order_totals_after_shipping', array($this, 'gqs_show_subtotal_without_vouchers'), 10, 1 );
-        
+
         // disable the built-in taxes when taxes are calculated for quotes
         add_filter( 'woocommerce_order_is_vat_exempt', array($this, 'disable_calculate_taxes_function_for_quotes'), 10, 2 );
 
@@ -84,7 +84,7 @@ class GQS_WooCommerce_Order {
 
         if($domain == 'yith-woocommerce-request-a-quote') {
             switch ( $translated_text ) {
-               
+
                 case 'PDF preview':
                     $translated_text = __( 'PDF Quote', $domain);
                     break;
@@ -95,30 +95,30 @@ class GQS_WooCommerce_Order {
                     $translated_text = __( 'Click to create a PDF of this quote.', $domain);
                     break;
             }
-        } 
+        }
         return $translated_text;
     }
-    
 
 
-    /** 
+
+    /**
      * Add custom keys to each submitted ywraq quote order
      */
     public function gqs_ywraq_from_cart_to_order_item( $values, $cart_item_key, $item_id, $order ) {
         $item = $order->get_item($item_id);
         // The WC_Product object
-        $product = $item->get_product(); 
+        $product = $item->get_product();
         $sku = $product->get_sku();
         if($sku == '') {
             $sku = ' ';
         }
 
-        $key = '_gqs_quote_type'; 
-        $value = ' '; 
+        $key = '_gqs_quote_type';
+        $value = ' ';
         wc_update_order_item_meta($item_id, $key, $value);
 
-        $key = '_gqs_quote_part_number'; 
-        $value = $sku; 
+        $key = '_gqs_quote_part_number';
+        $value = $sku;
         wc_update_order_item_meta($item_id, $key, $value);
     }
 
@@ -135,7 +135,7 @@ class GQS_WooCommerce_Order {
         }
         return $display_key;
     }
- 
+
     /**
      * Checks and adds meta key items on order or item save
      */
@@ -143,14 +143,15 @@ class GQS_WooCommerce_Order {
 
         if(is_a($item, 'WC_Order_Item_Product')) {
             $item_id = $item->get_id();
+            $product = $item->get_product();
+
             // The WC_Product object
             if(is_object($product)) {
-                $product = $item->get_product(); 
                 $sku = $product->get_sku();
                 if($sku == '') {
                     $sku = ' ';
                 }
-        
+
                 $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_type');
                 $this->update_wc_order_item_meta_key($item_id, '_gqs_quote_part_number', $sku);
             }
@@ -159,7 +160,7 @@ class GQS_WooCommerce_Order {
     }
 
     /**
-     * Custom function to check for and add order item meta if 
+     * Custom function to check for and add order item meta if
      * it does not exist.
      */
     private function update_wc_order_item_meta_key($item_id, $meta_key, $value = ' ') {
@@ -189,7 +190,7 @@ class GQS_WooCommerce_Order {
                 add_action( 'admin_enqueue_scripts', array($this, 'gqs_shop_order_quote_external_js'), 1, 1 );
 
             }
-        } // end if 
+        } // end if
     }
 
     /**
@@ -499,16 +500,16 @@ class GQS_WooCommerce_Order {
      * Add the metabox in the order area for the shipping options
      */
     public function gqs_shop_order_add_meta_boxes() {
-        add_meta_box( 
-            'gqs-order-custom', 
-            __( 'Add Shipping Methods' ), 
-            array($this, 'gqs_shop_order_custom_metabox_callback'), 
-            'shop_order', 
-            'normal', 
+        add_meta_box(
+            'gqs-order-custom',
+            __( 'Add Shipping Methods' ),
+            array($this, 'gqs_shop_order_custom_metabox_callback'),
+            'shop_order',
+            'normal',
             'high'
         );
     }
-    
+
     /**
      * Callback function to show the shipping option metabox
      */
@@ -517,7 +518,7 @@ class GQS_WooCommerce_Order {
         $freight_name = 'Freight - Delivery From Gineico QLD Warehouse To Client To Be Confirmed';
 
         $local_freight_name = 'Local Freight - Delivery From Gineico QLD Warehouse';
-        
+
         $international_freight_name = 'International Freight - From Manufacturer Warehouse';
         ?>
         <!-- <p><strong>Shipping</strong></p> -->
@@ -630,7 +631,7 @@ class GQS_WooCommerce_Order {
                     <input type="text" id="gqs_other_shipping_name" name="gqs_other_shipping_name" style="width: 100%; max-width: 516px;">
                 </div>
             </div> -->
-           
+
             <div class="gqs-options-row">
                 <div class="gqs-options-row-left">
                 <button class="button button-primary" id="gqs_reset_form">Reset Form</button>
@@ -682,7 +683,7 @@ class GQS_WooCommerce_Order {
                     'custom_attributes' => 'placeholder="0"',
                     'std'               => '',
                     'class'             => 'number-short',
-    
+
                 ),
             ),
         );
@@ -695,7 +696,7 @@ class GQS_WooCommerce_Order {
      */
     function gqs_update_pdf_name( $post_id ){
 
-        // Only for shop order 
+        // Only for shop order
         if ( 'shop_order' != $_POST[ 'post_type' ] )
             return $post_id;
 
@@ -725,16 +726,16 @@ class GQS_WooCommerce_Order {
                     update_post_meta( $post_id, '_gqs_ywraq_pdf_revision_number', $value );
                 }
                 // this was for text revision names
-                // if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -3))) { 
+                // if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -3))) {
                 //     $current_number = (int) substr($current_name, -3);
                 //     $new_number = substr($current_name, 0, -3) . $current_number++;
-                // } else if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -2))) { 
+                // } else if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -2))) {
                 //     $current_number = (int) substr($current_name, -2);
                 //     $new_number = substr($current_name, 0, -2) . $current_number++;
-                // } else if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -1))) { 
+                // } else if (preg_match('/^[1-9][0-9]*$/', substr($current_name, -1))) {
                 //     $current_number = (int) substr($current_name, -1);
                 //     if($current_number == 0) {
-                //         $new_number = substr($current_name, 0, -1) . '1';  
+                //         $new_number = substr($current_name, 0, -1) . '1';
                 //     } else {
                 //         $new_number = substr($current_name, 0, -1) . $current_number++;
                 //     }
@@ -762,6 +763,11 @@ class GQS_WooCommerce_Order {
         $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
 
         if(is_array($gqs_product_attributes)) {
+            // wl($item->get_subtotal());
+            // wl($item->get_meta_data());
+            // foreach ($item->get_meta_data() as $data) {
+            //     wl($data->get_data());
+            // }
             $html = '<div class="view">';
             $html .= '<table cellspacing="0" class="display_meta">';
             $html .= '<tbody>';
@@ -776,19 +782,12 @@ class GQS_WooCommerce_Order {
             }
             $html .= '</tbody>';
             $html .= '</table>';
-            $html .= '<a href="#" class="gqs-replace-partial-variable-product" data-item_id="' . $item_id . '" data-product_id="' . $product->get_id() . '" data-order_id="' . $item->get_order_id() . '">Replace Product</a>';
-
-            // $html .= '<input type="hidden" class="gqs-product-attributes" value=\'' . json_encode($gqs_product_attributes) . '\'>';
-            // $html .= '<a href="#gqs-replace-partial-variable-product-' . $item_id . '" class="gqs-replace-partial-variable-product" data-item_id="' . $item_id . '" data-product_id="' . $product->get_id() . '" data-order_id="' . $item->get_order_id() . '" data-gqs_product_attributes=\'' . json_encode($gqs_product_attributes) . '\'>Replace Product</a>';
-            // $html .= '<div id="gqs-replace-partial-variable-product-' . $item_id . '" >';
-            // $html .= '<div class="gl-wcwl-quote-select-option-variation"></div>';
-            // $html .= '<div class="gl-wcwl-select-option-variation-message"></div>';
-            // $html .= '<div class="gl-wcwl-quote-select-option-variation-loader"></div>';
+            $html .= '<a href="#" class="gqs-replace-partial-variable-product" data-item_id="' . $item_id . '" data-product_id="' . $product->get_id() . '" data-order_id="' . $item->get_order_id() . '">Replace/Update Product</a>';
             $html .= '</div>';
 
             echo $html;
         }
-       
+
     }
     /**
      * Template used by WCBackboneModal to show the popup in the admin area
@@ -800,7 +799,7 @@ class GQS_WooCommerce_Order {
                     <div class="wc-backbone-modal-content">
                         <section class="wc-backbone-modal-main" role="main">
                             <header class="wc-backbone-modal-header">
-                                <h1><?php esc_html_e( 'Add Variation', 'woocommerce' ); ?></h1>
+                                <h1><?php esc_html_e( 'Add / Update Variation', 'woocommerce' ); ?></h1>
                                 <button class="modal-close modal-close-link dashicons dashicons-no-alt">
                                     <span class="screen-reader-text">Close modal panel</span>
                                 </button>
@@ -816,7 +815,7 @@ class GQS_WooCommerce_Order {
                                         <div class="gqs-replace-item-checkbox-wrapper">
                                             <label><input type="checkbox" name="gqs-replace-item" checked="true"> Replace existing item</label>
                                         </div>
-                                        <button id="gqs-update-variable-product-in-order" class="button button-primary button-large gqs-update-variable-product-in-order" disabled><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
+                                        <button id="gqs-update-variable-product-in-order" class="button button-primary button-large gqs-update-variable-product-in-order" disabled><?php esc_html_e( 'Add / Update', 'woocommerce' ); ?></button>
                                     </div>
                                 </div>
                             </footer>
@@ -825,7 +824,7 @@ class GQS_WooCommerce_Order {
                 </div>
                 <div class="wc-backbone-modal-backdrop modal-close"></div>
             </script>
-        <?php 
+        <?php
     }
 
     /**
@@ -843,7 +842,7 @@ class GQS_WooCommerce_Order {
 
         $html = '';
 
-        // First we must manually add the variation js scripts or 
+        // First we must manually add the variation js scripts or
         // this won't work in Ajax
         $html .= "<script type='text/javascript' id='wc-add-to-cart-variation-js-extra'>
         /* <![CDATA[ */";
@@ -859,7 +858,7 @@ class GQS_WooCommerce_Order {
         $html .= ob_get_clean();
 
         $html .= $this->gqs_add_variable_product_form(array('id' => $product_id, 'item_id' => $item_id, 'order_id' => $order_id));
-        
+
         $return_arr = array(
             'html' => $html
         );
@@ -873,7 +872,7 @@ class GQS_WooCommerce_Order {
 			return '';
 		}
 
-		if ( ! isset( $atts['id'] ) && ! isset( $atts['sku'] ) ) {
+		if ( ! isset( $atts['id'] ) ) {
 			return '';
 		}
 
@@ -891,7 +890,7 @@ class GQS_WooCommerce_Order {
 
 		$single_product = new \WP_Query( $args );
 
-		$preselected_id = '0';
+        $preselected_id = '0';
 
 		// For "is_single" to always make load comments_template() for reviews.
 		$single_product->is_single = true;
@@ -911,19 +910,19 @@ class GQS_WooCommerce_Order {
 			$single_product->the_post();
 			?>
 			<div class="single-product <?php echo get_the_ID(); ?>" data-product-page-preselected-id="<?php echo esc_attr( $preselected_id ); ?>">
-            <h3 class="product-title">Product: <?php echo get_the_title(); ?></h3>
-				<?php 
+            <h3 class="product-title"><?php echo get_the_title(); ?></h3>
+				<?php
 
                 $item = new \WC_Order_Item_Product($atts['item_id']);
                 // show the customer chosen options
                 $gqs_product_attributes = $item->get_meta('_gqs_product_attributes');
 
-                if(is_array($gqs_product_attributes)) { 
+                if(is_array($gqs_product_attributes)) {
                     ?>
                     <div class="gqs-chosen-options-wrapper"><p>Options chosen by customer: </p>
                     <?php
                         foreach( $gqs_product_attributes as $key => $attribute ) {
-                            
+
                             if( $attribute['value'] == '' ) {
                                 $attribute['value'] = 'Not Chosen';
                             }
@@ -936,16 +935,16 @@ class GQS_WooCommerce_Order {
                         }
                         ?>
                     </div> <!-- .gqs-chosen-options -->
-                <?php 
+                <?php
                 } // end if is_array
                 ?>
                 <div class="gqs-choose-options-title"><h3>Choose options to add variation:</h3></div>
                 <?php
 
-                woocommerce_template_single_add_to_cart(); 
+                woocommerce_template_single_add_to_cart();
 
                 ?>
-   
+
                 <input type="hidden" class="gqs_order_id" value="<?php echo $atts['order_id']; ?>">
                 <input type="hidden" class="gqs_item_id" value="<?php echo $atts['item_id']; ?>">
 
@@ -967,7 +966,7 @@ class GQS_WooCommerce_Order {
      * Ajax to add selected variable item to the order and optionally replace an incomplete item
      */
     public function gqs_admin_add_selected_variation() {
-        
+
         $nonce_check = check_ajax_referer( 'gqs_admin_shop_order_init_nonce', 'nonce' );
 
         parse_str(urldecode(sanitize_text_field($_POST['variations_form'])), $variations_form);
@@ -977,13 +976,37 @@ class GQS_WooCommerce_Order {
         $order_id = sanitize_text_field($_POST['order_id']);
         $replace_item = sanitize_text_field($_POST['replace_item']);
 
+        // previous item info
+        $item = new \WC_Order_Item_Product($item_id);
+        $previous_item_data = $item->get_data();
+        $previous_item_quantity = $previous_item_data['quantity'];
+        $previous_item_subtotal = $previous_item_data['subtotal'];
+        $previous_item_total = $previous_item_data['total'];
+        $previous_item_meta_data = $previous_item_data['meta_data'];
+
+        $product_args = array(
+            'totals' => array(
+                'subtotal' => $previous_item_subtotal,
+                'total' => $previous_item_total
+            )
+        );
+
         $order = wc_get_order( $order_id );
 
         $variation_to_add = wc_get_product($variation_id);
 
-        $new_item_id = $order->add_product( $variation_to_add, 1 );
+        $new_item_id = $order->add_product( $variation_to_add, $previous_item_quantity, $product_args );
 
-        // get the variation attributes and assign them to the line 
+        // update the item meta with the meta from the old item
+        foreach ($previous_item_meta_data as $item_meta_line) {
+            $this_item_meta = $item_meta_line->get_data();
+            if($this_item_meta['key'] != '_gqs_product_attributes') {
+                wc_update_order_item_meta( $new_item_id, $this_item_meta['key'], $this_item_meta['value'] );
+            }
+        }
+
+
+        // get the variation attributes and assign them to the line
         // item if they exist in the form
         foreach($variation_to_add->get_attributes() as $key => $attribute) {
             $attribute_key = 'attribute_' . sanitize_title( $key );
@@ -991,6 +1014,7 @@ class GQS_WooCommerce_Order {
                 wc_update_order_item_meta( $new_item_id, $key, $variations_form[ $attribute_key ] );
             }
         }
+
 
         if($replace_item == 'true') {
 
@@ -1046,7 +1070,7 @@ class GQS_WooCommerce_Order {
                     $parent_id = $product->get_parent_id();
                     $quote_description = get_post_meta($parent_id, 'quote_description', true);
                 }
-            } 
+            }
             // if($quote_description != '') {
                 // echo '<div class="gqs-quote-description"><strong>Quote Description: </strong>' . $quote_description . '<div class="edit"><table class="gqs-quote-description-edit"><tr><td><textarea name="gqs-quote-description[' . $item_id . ']" disabled>' . $quote_description . '</textarea></td><td><a href="#" class=name="gqs-quote-description-edit-link" data-item_id="' . $item_id . '">Edit</a><a href="#" class=name="gqs-quote-description-cancel-edit-link" data-item_id="' . $item_id . '">Cancel</a> <label><input type="checkbox" name="gqs-quote-description-update-product[' . $item_id . ']">Update Description for All</label></td></tr></table></div></div>';
                 // echo '<div class="gqs-quote-description"><strong>Quote Description: </strong>' . $quote_description . '<span class="edit gqs-quote-description-edit-links"><a href="#" class="gqs-quote-description-edit-link" data-item_id="' . $item_id . '">Edit</a><a href="#" class="gqs-quote-description-cancel-edit-link hide-link" data-item_id="' . $item_id . '">Cancel</a></span><div class="gqs-quote-description-edit"><label class="gqs-quote-description-edit-label" for="gqs-quote-description[' . $item_id . ']">Enter New Quote Description:</label><textarea name="gqs-quote-description[' . $item_id . ']">' . $quote_description . '</textarea> <label><input type="checkbox" name="gqs-quote-description-update-product[' . $item_id . ']">&nbsp;Update Description for All</label></div></div>';
@@ -1059,7 +1083,7 @@ class GQS_WooCommerce_Order {
                         <span class="edit gqs-quote-description-edit-links"><a href="#" class="gqs-quote-description-edit-link" data-item_id="<?php echo $item_id ; ?>">Edit</a></span>
                         <span class="gqs-quote-description-text"><?php echo wpautop($quote_description_custom_meta) ; ?></span>
 
-                        <? // set it for the text area 
+                        <? // set it for the text area
                         $quote_description = $quote_description_custom_meta;
                         ?>
                     <?php else: ?>
@@ -1092,7 +1116,7 @@ class GQS_WooCommerce_Order {
     public function gqs_show_original_price_header($order) {
         echo '<th class="gqs-original-price" style="text-align: right;">Original Cost</th>';
     }
-    
+
     public function gqs_show_original_price_value($product, $item, $item_id) {
         $current_cost = 'null';
         $original_price_html = '';
@@ -1112,7 +1136,7 @@ class GQS_WooCommerce_Order {
         $site = GQS_Site_Utils::get_gineico_site_abbreviation();
 
         $order = wc_get_order($order_id);
-        
+
         if($order->get_status() == 'ywraq-new' || $order->get_status() == 'ywraq-pending' || $order->get_status() == 'ywraq-expired' || $order->get_status() == 'ywraq-accepted' || $order->get_status() == 'ywraq-rejected' ) {
 
             // calculate totals and remove any built-in taxes
@@ -1133,7 +1157,7 @@ class GQS_WooCommerce_Order {
                 <td class="total"><?php echo wc_price($total_ex_gst); ?></td>
             </tr>
 
-            <?php 
+            <?php
             // if($site == 'GL') {
                 // $order_gst = round((floatval($order->get_total() - $order->get_total_tax()) * .1), 2);
                 $order_gst = round((floatval($order->get_total()) * .1), 2);
